@@ -17,14 +17,12 @@ class GameService extends ChangeNotifier {
   int _currentSetIndex = 0;
 
   // Seleções temporárias para adicionar ponto
-  int? _selectedPosition1;
-  int? _selectedPosition2;
   PointType? _selectedType1;
   PointType? _selectedType2;
-  PointOrigin? _selectedOrigin1;
-  PointOrigin? _selectedOrigin2;
-  int? _selectedSetter1;
-  int? _selectedSetter2;
+  PointDetail? _selectedDetail1;
+  PointDetail? _selectedDetail2;
+  String? _selectedPlayer1;
+  String? _selectedPlayer2;
 
   // Getters
   Team get team1 => _team1;
@@ -33,14 +31,12 @@ class GameService extends ChangeNotifier {
   int get currentSetIndex => _currentSetIndex;
   SetData get currentSet => _sets[_currentSetIndex];
 
-  int? get selectedPosition1 => _selectedPosition1;
-  int? get selectedPosition2 => _selectedPosition2;
   PointType? get selectedType1 => _selectedType1;
   PointType? get selectedType2 => _selectedType2;
-  PointOrigin? get selectedOrigin1 => _selectedOrigin1;
-  PointOrigin? get selectedOrigin2 => _selectedOrigin2;
-  int? get selectedSetter1 => _selectedSetter1;
-  int? get selectedSetter2 => _selectedSetter2;
+  PointDetail? get selectedDetail1 => _selectedDetail1;
+  PointDetail? get selectedDetail2 => _selectedDetail2;
+  String? get selectedPlayer1 => _selectedPlayer1;
+  String? get selectedPlayer2 => _selectedPlayer2;
 
   /// Placar atual da equipe no set atual
   int getScore(int teamIndex) => currentSet.getScore(teamIndex);
@@ -67,43 +63,48 @@ class GameService extends ChangeNotifier {
   }
 
   // Setters para seleções
-  void setPosition(int teamIndex, int? value) {
-    if (teamIndex == 0) {
-      _selectedPosition1 = value;
-    } else {
-      _selectedPosition2 = value;
-    }
-    notifyListeners();
-  }
-
   void setPointType(int teamIndex, PointType? value) {
     if (teamIndex == 0) {
       _selectedType1 = value;
+      // Limpa detalhe se mudar tipo
+      _selectedDetail1 = null;
+      // Não limpa jogador propositalmente para manter seleção rápida se for o mesmo
     } else {
       _selectedType2 = value;
+      _selectedDetail2 = null;
     }
     notifyListeners();
   }
 
-  void setOrigin(int teamIndex, PointOrigin? value) {
+  void setPointDetail(int teamIndex, PointDetail? value) {
     if (teamIndex == 0) {
-      _selectedOrigin1 = value;
+      _selectedDetail1 = value;
     } else {
-      _selectedOrigin2 = value;
+      _selectedDetail2 = value;
     }
     notifyListeners();
   }
 
-  void setSetter(int teamIndex, int? value) {
+  void setPlayer(int teamIndex, String? playerId) {
     if (teamIndex == 0) {
-      _selectedSetter1 = value;
+      _selectedPlayer1 = playerId;
     } else {
-      _selectedSetter2 = value;
+      _selectedPlayer2 = playerId;
     }
     notifyListeners();
   }
 
-  /// Atualiza nome da equipe
+  /// Define uma equipe completa (para usar do Storage)
+  void setTeam(int teamIndex, Team team) {
+    if (teamIndex == 0) {
+      _team1 = team;
+    } else {
+      _team2 = team;
+    }
+    notifyListeners();
+  }
+
+  /// Atualiza nome da equipe (uso manual/rápido)
   void setTeamName(int teamIndex, String name) {
     if (teamIndex == 0) {
       _team1 = _team1.copyWith(name: name);
@@ -117,30 +118,40 @@ class GameService extends ChangeNotifier {
   static const int maxPointsPerSet = 25;
 
   /// Adiciona um ponto para a equipe
-  /// Retorna false se tipo não selecionado ou limite atingido
+  /// Retorna false se tipo/detalhe não selecionado ou limite atingido
   bool addPoint(int teamIndex) {
     // Verificar limite de pontos
     if (getScore(teamIndex) >= maxPointsPerSet) {
       return false;
     }
 
-    final position = teamIndex == 0 ? _selectedPosition1 : _selectedPosition2;
     final type = teamIndex == 0 ? _selectedType1 : _selectedType2;
-    final origin = teamIndex == 0 ? _selectedOrigin1 : _selectedOrigin2;
-    final setter = teamIndex == 0 ? _selectedSetter1 : _selectedSetter2;
+    final detail = teamIndex == 0 ? _selectedDetail1 : _selectedDetail2;
+    final playerId = teamIndex == 0 ? _selectedPlayer1 : _selectedPlayer2;
 
-    // Validação: pelo menos tipo é obrigatório
-    if (type == null) return false;
+    // Validação: tipo e detalhe são obrigatórios
+    if (type == null || detail == null) return false;
+
+    // Se a equipe tem jogadores cadastrados, validar se jogador foi selecionado
+    final team = teamIndex == 0 ? _team1 : _team2;
+    if (team.players.isNotEmpty && playerId == null) {
+      // Opcional: retornar false ou permitir ponto sem jogador?
+      // O requisito diz "permitindo que seja indicado", vou assumir que é obrigatório para manter consistência
+      return false;
+    }
 
     final point = Point(
       teamIndex: teamIndex,
-      position: position ?? 1,
       type: type,
-      origin: origin ?? PointOrigin.sideOut,
-      setterPosition: setter ?? 1,
+      detail: detail,
+      playerId: playerId,
     );
 
     _sets[_currentSetIndex] = currentSet.addPoint(point);
+
+    // Limpar seleções após marcar
+    _clearSelections(teamIndex);
+
     notifyListeners();
     return true;
   }
@@ -183,18 +194,28 @@ class GameService extends ChangeNotifier {
   void resetGame() {
     _sets = [const SetData(setNumber: 1)];
     _currentSetIndex = 0;
-    _clearSelections();
+    _clearAllSelections();
     notifyListeners();
   }
 
-  void _clearSelections() {
-    _selectedPosition1 = null;
-    _selectedPosition2 = null;
+  void _clearSelections(int teamIndex) {
+    if (teamIndex == 0) {
+      _selectedType1 = null;
+      _selectedDetail1 = null;
+      _selectedPlayer1 = null;
+    } else {
+      _selectedType2 = null;
+      _selectedDetail2 = null;
+      _selectedPlayer2 = null;
+    }
+  }
+
+  void _clearAllSelections() {
     _selectedType1 = null;
+    _selectedDetail1 = null;
+    _selectedPlayer1 = null;
     _selectedType2 = null;
-    _selectedOrigin1 = null;
-    _selectedOrigin2 = null;
-    _selectedSetter1 = null;
-    _selectedSetter2 = null;
+    _selectedDetail2 = null;
+    _selectedPlayer2 = null;
   }
 }

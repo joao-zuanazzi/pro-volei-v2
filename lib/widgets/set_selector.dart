@@ -20,82 +20,87 @@ class SetSelector extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
       decoration: BoxDecoration(
         color: AppTheme.cardBackground,
         borderRadius: BorderRadius.circular(16),
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: List.generate(totalSets, (index) {
-          final setNumber = index + 1;
-          final isSelected = currentSet == setNumber;
-          final winner = index < setWinners.length ? setWinners[index] : null;
-          final isFinished = winner != null;
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: List.generate(totalSets, (index) {
+            final setNumber = index + 1;
+            final isSelected = currentSet == setNumber;
+            final winner = index < setWinners.length ? setWinners[index] : null;
+            final isFinished = winner != null;
 
-          return GestureDetector(
-            onTap: () => onSetSelected(setNumber),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              margin: const EdgeInsets.symmetric(horizontal: 6),
-              width: 56,
-              height: 56,
-              decoration: BoxDecoration(
-                gradient: isSelected ? AppTheme.primaryGradient : null,
-                color: isSelected
-                    ? null
-                    : (isFinished
-                          ? (winner == 0
-                                ? AppTheme.team1Color.withValues(alpha: 0.3)
-                                : AppTheme.team2Color.withValues(alpha: 0.3))
-                          : AppTheme.surfaceLight),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: isSelected ? AppTheme.primaryGold : Colors.transparent,
-                  width: 2,
+            return GestureDetector(
+              onTap: () => onSetSelected(setNumber),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                margin: const EdgeInsets.symmetric(horizontal: 4),
+                width: 50,
+                height: 50,
+                decoration: BoxDecoration(
+                  gradient: isSelected ? AppTheme.primaryGradient : null,
+                  color: isSelected
+                      ? null
+                      : (isFinished
+                            ? (winner == 0
+                                  ? AppTheme.team1Color.withValues(alpha: 0.3)
+                                  : AppTheme.team2Color.withValues(alpha: 0.3))
+                            : AppTheme.surfaceLight),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: isSelected
+                        ? AppTheme.primaryGold
+                        : Colors.transparent,
+                    width: 2,
+                  ),
+                  boxShadow: isSelected
+                      ? [
+                          BoxShadow(
+                            color: AppTheme.primaryBlue.withValues(alpha: 0.4),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ]
+                      : null,
                 ),
-                boxShadow: isSelected
-                    ? [
-                        BoxShadow(
-                          color: AppTheme.primaryBlue.withValues(alpha: 0.4),
-                          blurRadius: 8,
-                          offset: const Offset(0, 2),
-                        ),
-                      ]
-                    : null,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      'SET',
+                      style: TextStyle(
+                        color: isSelected ? Colors.white70 : Colors.white38,
+                        fontSize: 8,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    Text(
+                      '$setNumber',
+                      style: TextStyle(
+                        color: isSelected ? Colors.white : Colors.white70,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    if (isFinished)
+                      Icon(
+                        Icons.check_circle,
+                        size: 10,
+                        color: winner == 0
+                            ? AppTheme.team1Color
+                            : AppTheme.team2Color,
+                      ),
+                  ],
+                ),
               ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    'SET',
-                    style: TextStyle(
-                      color: isSelected ? Colors.white70 : Colors.white38,
-                      fontSize: 9,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  Text(
-                    '$setNumber',
-                    style: TextStyle(
-                      color: isSelected ? Colors.white : Colors.white70,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  if (isFinished)
-                    Icon(
-                      Icons.check_circle,
-                      size: 10,
-                      color: winner == 0
-                          ? AppTheme.team1Color
-                          : AppTheme.team2Color,
-                    ),
-                ],
-              ),
-            ),
-          );
-        }),
+            );
+          }),
+        ),
       ),
     );
   }

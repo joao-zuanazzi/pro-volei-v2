@@ -6,6 +6,7 @@ import 'package:open_file/open_file.dart';
 import '../models/set_data.dart';
 import '../models/team.dart';
 import '../models/team_stats.dart';
+import '../models/player.dart';
 
 /// Serviço para geração de PDFs
 class PdfService {
@@ -38,6 +39,10 @@ class PdfService {
           _buildChart(stats1, stats2),
           pw.SizedBox(height: 20),
           _buildLegend(team1.name, team2.name),
+          if (team1.players.isNotEmpty || team2.players.isNotEmpty) ...[
+            pw.SizedBox(height: 40),
+            _buildPlayerStatsTable([setData], team1, team2),
+          ],
         ],
       ),
     );
@@ -84,6 +89,10 @@ class PdfService {
           _buildLegend(team1.name, team2.name),
           pw.SizedBox(height: 40),
           _buildSetsBreakdown(sets, team1.name, team2.name),
+          if (team1.players.isNotEmpty || team2.players.isNotEmpty) ...[
+            pw.SizedBox(height: 40),
+            _buildPlayerStatsTable(sets, team1, team2),
+          ],
         ],
       ),
     );
@@ -91,6 +100,253 @@ class PdfService {
     return _saveAndOpenPdf(
       pdf,
       'partida_${DateTime.now().millisecondsSinceEpoch}.pdf',
+    );
+  }
+
+  static pw.Widget _buildPlayerStatsTable(
+    List<SetData> sets,
+    Team team1,
+    Team team2,
+  ) {
+    // Helper para calcular stats de jogador
+    Map<String, Map<String, int>> getPlayerStats(
+      int teamIndex,
+      List<SetData> sets,
+    ) {
+      final stats = <String, Map<String, int>>{};
+
+      for (final set in sets) {
+        final points = set.points.where(
+          (p) => p.teamIndex == teamIndex && p.playerId != null,
+        );
+        for (final point in points) {
+          final pid = point.playerId!;
+          if (!stats.containsKey(pid)) {
+            stats[pid] = {'total': 0, 'serve': 0, 'block': 0, 'attack': 0};
+          }
+
+          stats[pid]!['total'] = stats[pid]!['total']! + 1;
+
+          if (point.type.label == 'Saque')
+            stats[pid]!['serve'] = stats[pid]!['serve']! + 1;
+          if (point.type.label == 'Bloqueio')
+            stats[pid]!['block'] = stats[pid]!['block']! + 1;
+          if (point.type.label == 'Ataque')
+            stats[pid]!['attack'] = stats[pid]!['attack']! + 1;
+        }
+      }
+      return stats;
+    }
+
+    final stats1 = getPlayerStats(0, sets);
+    final stats2 = getPlayerStats(1, sets);
+
+    return pw.Column(
+      crossAxisAlignment: pw.CrossAxisAlignment.start,
+      children: [
+        pw.Text(
+          'ESTATÍSTICAS INDIVIDUAIS',
+          style: pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold),
+        ),
+        pw.SizedBox(height: 10),
+        pw.Table(
+          border: pw.TableBorder.all(color: PdfColors.grey400),
+          children: [
+            // Header
+            pw.TableRow(
+              decoration: const pw.BoxDecoration(color: PdfColors.blueGrey700),
+              children: [
+                pw.Padding(
+                  padding: const pw.EdgeInsets.all(8),
+                  child: pw.Text(
+                    'Equipe / Atleta',
+                    style: pw.TextStyle(
+                      color: PdfColors.white,
+                      fontWeight: pw.FontWeight.bold,
+                    ),
+                  ),
+                ),
+                pw.Padding(
+                  padding: const pw.EdgeInsets.all(8),
+                  child: pw.Text(
+                    'Pts',
+                    style: pw.TextStyle(
+                      color: PdfColors.white,
+                      fontWeight: pw.FontWeight.bold,
+                    ),
+                    textAlign: pw.TextAlign.center,
+                  ),
+                ),
+                pw.Padding(
+                  padding: const pw.EdgeInsets.all(8),
+                  child: pw.Text(
+                    'Saque',
+                    style: pw.TextStyle(
+                      color: PdfColors.white,
+                      fontWeight: pw.FontWeight.bold,
+                    ),
+                    textAlign: pw.TextAlign.center,
+                  ),
+                ),
+                pw.Padding(
+                  padding: const pw.EdgeInsets.all(8),
+                  child: pw.Text(
+                    'Bloq',
+                    style: pw.TextStyle(
+                      color: PdfColors.white,
+                      fontWeight: pw.FontWeight.bold,
+                    ),
+                    textAlign: pw.TextAlign.center,
+                  ),
+                ),
+                pw.Padding(
+                  padding: const pw.EdgeInsets.all(8),
+                  child: pw.Text(
+                    'Ataque',
+                    style: pw.TextStyle(
+                      color: PdfColors.white,
+                      fontWeight: pw.FontWeight.bold,
+                    ),
+                    textAlign: pw.TextAlign.center,
+                  ),
+                ),
+              ],
+            ),
+            // Team 1
+            if (stats1.isNotEmpty) ...[
+              pw.TableRow(
+                decoration: pw.BoxDecoration(color: PdfColors.grey200),
+                children: [
+                  pw.Padding(
+                    padding: const pw.EdgeInsets.all(8),
+                    child: pw.Text(
+                      team1.name,
+                      style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
+                    ),
+                  ),
+                  pw.SizedBox(),
+                  pw.SizedBox(),
+                  pw.SizedBox(),
+                  pw.SizedBox(),
+                ],
+              ),
+              ...stats1.entries.map((entry) {
+                final player = team1.players.firstWhere(
+                  (p) => p.id == entry.key,
+                  orElse: () => Player(id: '', name: 'Desconhecido', number: 0),
+                );
+                final s = entry.value;
+                return pw.TableRow(
+                  children: [
+                    pw.Padding(
+                      padding: const pw.EdgeInsets.only(
+                        left: 16,
+                        top: 4,
+                        bottom: 4,
+                      ),
+                      child: pw.Text('#${player.number} ${player.name}'),
+                    ),
+                    pw.Padding(
+                      padding: const pw.EdgeInsets.all(4),
+                      child: pw.Text(
+                        '${s['total']}',
+                        textAlign: pw.TextAlign.center,
+                      ),
+                    ),
+                    pw.Padding(
+                      padding: const pw.EdgeInsets.all(4),
+                      child: pw.Text(
+                        '${s['serve']}',
+                        textAlign: pw.TextAlign.center,
+                      ),
+                    ),
+                    pw.Padding(
+                      padding: const pw.EdgeInsets.all(4),
+                      child: pw.Text(
+                        '${s['block']}',
+                        textAlign: pw.TextAlign.center,
+                      ),
+                    ),
+                    pw.Padding(
+                      padding: const pw.EdgeInsets.all(4),
+                      child: pw.Text(
+                        '${s['attack']}',
+                        textAlign: pw.TextAlign.center,
+                      ),
+                    ),
+                  ],
+                );
+              }),
+            ],
+            // Team 2
+            if (stats2.isNotEmpty) ...[
+              pw.TableRow(
+                decoration: pw.BoxDecoration(color: PdfColors.grey200),
+                children: [
+                  pw.Padding(
+                    padding: const pw.EdgeInsets.all(8),
+                    child: pw.Text(
+                      team2.name,
+                      style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
+                    ),
+                  ),
+                  pw.SizedBox(),
+                  pw.SizedBox(),
+                  pw.SizedBox(),
+                  pw.SizedBox(),
+                ],
+              ),
+              ...stats2.entries.map((entry) {
+                final player = team2.players.firstWhere(
+                  (p) => p.id == entry.key,
+                  orElse: () => Player(id: '', name: 'Desconhecido', number: 0),
+                );
+                final s = entry.value;
+                return pw.TableRow(
+                  children: [
+                    pw.Padding(
+                      padding: const pw.EdgeInsets.only(
+                        left: 16,
+                        top: 4,
+                        bottom: 4,
+                      ),
+                      child: pw.Text('#${player.number} ${player.name}'),
+                    ),
+                    pw.Padding(
+                      padding: const pw.EdgeInsets.all(4),
+                      child: pw.Text(
+                        '${s['total']}',
+                        textAlign: pw.TextAlign.center,
+                      ),
+                    ),
+                    pw.Padding(
+                      padding: const pw.EdgeInsets.all(4),
+                      child: pw.Text(
+                        '${s['serve']}',
+                        textAlign: pw.TextAlign.center,
+                      ),
+                    ),
+                    pw.Padding(
+                      padding: const pw.EdgeInsets.all(4),
+                      child: pw.Text(
+                        '${s['block']}',
+                        textAlign: pw.TextAlign.center,
+                      ),
+                    ),
+                    pw.Padding(
+                      padding: const pw.EdgeInsets.all(4),
+                      child: pw.Text(
+                        '${s['attack']}',
+                        textAlign: pw.TextAlign.center,
+                      ),
+                    ),
+                  ],
+                );
+              }),
+            ],
+          ],
+        ),
+      ],
     );
   }
 

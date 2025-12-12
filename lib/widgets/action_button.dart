@@ -55,29 +55,32 @@ class GradientButton extends StatelessWidget {
                       ),
                     ],
             ),
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                if (icon != null) ...[
-                  Icon(
-                    icon,
-                    color: isOutlined ? AppTheme.primaryGold : Colors.white,
-                    size: 18,
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  if (icon != null) ...[
+                    Icon(
+                      icon,
+                      color: isOutlined ? AppTheme.primaryGold : Colors.white,
+                      size: 16,
+                    ),
+                    const SizedBox(width: 4),
+                  ],
+                  Text(
+                    text,
+                    style: TextStyle(
+                      color: isOutlined ? AppTheme.primaryGold : Colors.white,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: 0.3,
+                    ),
                   ),
-                  const SizedBox(width: 8),
                 ],
-                Text(
-                  text,
-                  style: TextStyle(
-                    color: isOutlined ? AppTheme.primaryGold : Colors.white,
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    letterSpacing: 0.5,
-                  ),
-                ),
-              ],
+              ),
             ),
           ),
         ),

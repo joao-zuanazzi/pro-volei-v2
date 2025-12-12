@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/point_type.dart';
+import '../models/player.dart';
 import '../theme/app_theme.dart';
 
 /// Painel de controle de uma equipe
@@ -8,17 +9,19 @@ class TeamPanel extends StatelessWidget {
   final String teamName;
   final Color teamColor;
   final int score;
-  final int? selectedPosition;
+  final List<Player> players;
+  final List<Player> opponentPlayers;
   final PointType? selectedType;
-  final PointOrigin? selectedOrigin;
-  final int? selectedSetter;
-  final ValueChanged<int?> onPositionChanged;
+  final PointDetail? selectedDetail;
+  final String? selectedPlayerId;
   final ValueChanged<PointType?> onTypeChanged;
-  final ValueChanged<PointOrigin?> onOriginChanged;
-  final ValueChanged<int?> onSetterChanged;
+  final ValueChanged<PointDetail?> onDetailChanged;
+  final ValueChanged<String?> onPlayerChanged;
   final VoidCallback onSave;
   final VoidCallback onDelete;
   final VoidCallback? onEditName;
+
+  final bool isExpanded;
 
   const TeamPanel({
     super.key,
@@ -26,21 +29,47 @@ class TeamPanel extends StatelessWidget {
     required this.teamName,
     required this.teamColor,
     required this.score,
-    this.selectedPosition,
+    this.players = const [],
+    this.opponentPlayers = const [],
     this.selectedType,
-    this.selectedOrigin,
-    this.selectedSetter,
-    required this.onPositionChanged,
+    this.selectedDetail,
+    this.selectedPlayerId,
     required this.onTypeChanged,
-    required this.onOriginChanged,
-    required this.onSetterChanged,
+    required this.onDetailChanged,
+    required this.onPlayerChanged,
     required this.onSave,
     required this.onDelete,
     this.onEditName,
+    this.isExpanded = true,
   });
 
   @override
   Widget build(BuildContext context) {
+    Widget content = SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      physics: isExpanded ? null : const NeverScrollableScrollPhysics(),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _buildTypeSelector(),
+          if (selectedType != null) ...[
+            const SizedBox(height: 16),
+            _buildDetailSelector(),
+          ],
+          if (selectedType != null) ...[
+            const SizedBox(height: 16),
+            _buildPlayerSelector(),
+          ],
+          const SizedBox(height: 24),
+          _buildActions(context),
+        ],
+      ),
+    );
+
+    if (isExpanded) {
+      content = Expanded(child: content);
+    }
+
     return Container(
       margin: const EdgeInsets.all(8),
       decoration: BoxDecoration(
@@ -57,28 +86,7 @@ class TeamPanel extends StatelessWidget {
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          _buildHeader(),
-          Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  _buildPositionSelector(),
-                  const SizedBox(height: 16),
-                  _buildTypeSelector(),
-                  const SizedBox(height: 16),
-                  _buildOriginSelector(),
-                  const SizedBox(height: 16),
-                  _buildSetterSelector(),
-                  const SizedBox(height: 24),
-                  _buildActions(context),
-                ],
-              ),
-            ),
-          ),
-        ],
+        children: [_buildHeader(), content],
       ),
     );
   }
@@ -146,24 +154,83 @@ class TeamPanel extends StatelessWidget {
     );
   }
 
-  Widget _buildPositionSelector() {
+  Widget _buildTypeSelector() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildLabel('Posição do Ponto'),
+        _buildLabel('Tipo de Ponto'),
+        const SizedBox(height: 8),
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            children: PointType.values.map((type) {
+              final isSelected = selectedType == type;
+              return Padding(
+                padding: const EdgeInsets.only(right: 8),
+                child: GestureDetector(
+                  onTap: () => onTypeChanged(isSelected ? null : type),
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 10,
+                    ),
+                    decoration: BoxDecoration(
+                      color: isSelected ? teamColor : AppTheme.surfaceLight,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: isSelected ? teamColor : Colors.transparent,
+                        width: 2,
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(type.icon, style: const TextStyle(fontSize: 16)),
+                        const SizedBox(width: 6),
+                        Text(
+                          type.label,
+                          style: TextStyle(
+                            color: isSelected ? Colors.white : Colors.white70,
+                            fontSize: 13,
+                            fontWeight: isSelected
+                                ? FontWeight.w600
+                                : FontWeight.normal,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDetailSelector() {
+    if (selectedType == null) return const SizedBox();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildLabel('Detalhe'),
         const SizedBox(height: 8),
         Wrap(
           spacing: 8,
           runSpacing: 8,
-          children: List.generate(6, (index) {
-            final position = index + 1;
-            final isSelected = selectedPosition == position;
+          children: selectedType!.availableDetails.map((detail) {
+            final isSelected = selectedDetail == detail;
             return GestureDetector(
-              onTap: () => onPositionChanged(isSelected ? null : position),
+              onTap: () => onDetailChanged(isSelected ? null : detail),
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 200),
-                width: 44,
-                height: 44,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 10,
+                ),
                 decoration: BoxDecoration(
                   color: isSelected ? teamColor : AppTheme.surfaceLight,
                   borderRadius: BorderRadius.circular(12),
@@ -172,53 +239,82 @@ class TeamPanel extends StatelessWidget {
                     width: 2,
                   ),
                 ),
-                alignment: Alignment.center,
                 child: Text(
-                  '$position',
+                  detail.label,
                   style: TextStyle(
                     color: isSelected ? Colors.white : Colors.white70,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
+                    fontSize: 13,
+                    fontWeight: isSelected
+                        ? FontWeight.w600
+                        : FontWeight.normal,
                   ),
                 ),
               ),
             );
-          }),
+          }).toList(),
         ),
       ],
     );
   }
 
-  Widget _buildTypeSelector() {
+  Widget _buildPlayerSelector() {
+    final targetPlayers = selectedType == PointType.opponentError
+        ? opponentPlayers
+        : players;
+
+    if (targetPlayers.isEmpty) return const SizedBox();
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildLabel('Tipo de Ponto'),
+        _buildLabel(
+          selectedType == PointType.opponentError
+              ? 'Quem errou (Equipe Adversária)?'
+              : 'Quem marcou?',
+        ),
         const SizedBox(height: 8),
         Wrap(
           spacing: 8,
           runSpacing: 8,
-          children: PointType.values.map((type) {
-            final isSelected = selectedType == type;
+          children: targetPlayers.map((player) {
+            final isSelected = selectedPlayerId == player.id;
             return GestureDetector(
-              onTap: () => onTypeChanged(isSelected ? null : type),
+              onTap: () => onPlayerChanged(isSelected ? null : player.id),
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 200),
                 padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
+                  horizontal: 16,
                   vertical: 10,
                 ),
                 decoration: BoxDecoration(
                   color: isSelected ? teamColor : AppTheme.surfaceLight,
                   borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: isSelected ? teamColor : Colors.transparent,
+                    width: 2,
+                  ),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text(type.icon, style: const TextStyle(fontSize: 16)),
-                    const SizedBox(width: 6),
+                    Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: const BoxDecoration(
+                        color: Colors.white24,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Text(
+                        '${player.number}',
+                        style: const TextStyle(
+                          fontSize: 10,
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
                     Text(
-                      type.label,
+                      player.name.split(' ').first,
                       style: TextStyle(
                         color: isSelected ? Colors.white : Colors.white70,
                         fontSize: 13,
@@ -237,103 +333,34 @@ class TeamPanel extends StatelessWidget {
     );
   }
 
-  Widget _buildOriginSelector() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildLabel('Origem'),
-        const SizedBox(height: 8),
-        Row(
-          children: PointOrigin.values.map((origin) {
-            final isSelected = selectedOrigin == origin;
-            return Expanded(
-              child: GestureDetector(
-                onTap: () => onOriginChanged(isSelected ? null : origin),
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
-                  margin: EdgeInsets.only(
-                    right: origin == PointOrigin.sideOut ? 8 : 0,
-                  ),
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  decoration: BoxDecoration(
-                    color: isSelected ? teamColor : AppTheme.surfaceLight,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  alignment: Alignment.center,
-                  child: Text(
-                    origin.label,
-                    style: TextStyle(
-                      color: isSelected ? Colors.white : Colors.white70,
-                      fontSize: 13,
-                      fontWeight: isSelected
-                          ? FontWeight.w600
-                          : FontWeight.normal,
-                    ),
-                  ),
-                ),
-              ),
-            );
-          }).toList(),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildSetterSelector() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildLabel('Levantador'),
-        const SizedBox(height: 8),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: List.generate(6, (index) {
-            final position = index + 1;
-            final isSelected = selectedSetter == position;
-            return GestureDetector(
-              onTap: () => onSetterChanged(isSelected ? null : position),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  color: isSelected
-                      ? teamColor.withValues(alpha: 0.7)
-                      : AppTheme.surfaceLight,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                alignment: Alignment.center,
-                child: Text(
-                  '$position',
-                  style: TextStyle(
-                    color: isSelected ? Colors.white : Colors.white70,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            );
-          }),
-        ),
-      ],
-    );
-  }
-
   Widget _buildActions(BuildContext context) {
+    // Só habilita salvar se tipo e detalhe estiverem selecionados
+    // Se houver jogadores target, um jogador deve ser selecionado
+    final targetPlayers = selectedType == PointType.opponentError
+        ? opponentPlayers
+        : players;
+
+    final canSave =
+        selectedType != null &&
+        selectedDetail != null &&
+        (targetPlayers.isEmpty || selectedPlayerId != null);
+
     return Row(
       children: [
         Expanded(
-          child: ElevatedButton.icon(
-            onPressed: onSave,
-            icon: const Icon(Icons.add, size: 20),
-            label: const Text('SALVAR'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppTheme.success,
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(vertical: 14),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
+          child: Opacity(
+            opacity: canSave ? 1.0 : 0.5,
+            child: ElevatedButton.icon(
+              onPressed: canSave ? onSave : null,
+              icon: const Icon(Icons.add, size: 20),
+              label: const Text('SALVAR'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppTheme.success,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
             ),
           ),

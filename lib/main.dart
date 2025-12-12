@@ -1,21 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'services/game_service.dart';
+import 'services/storage_service.dart';
 import 'theme/app_theme.dart';
 import 'screens/home_screen.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(const ProVoleiApp());
+
+  final storageService = StorageService();
+  await storageService.init();
+
+  runApp(ProVoleiApp(storageService: storageService));
 }
 
 class ProVoleiApp extends StatelessWidget {
-  const ProVoleiApp({super.key});
+  final StorageService storageService;
+
+  const ProVoleiApp({super.key, required this.storageService});
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => GameService(),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider.value(value: storageService),
+        ChangeNotifierProvider(create: (_) => GameService()),
+      ],
       child: MaterialApp(
         title: 'Pro Volei',
         debugShowCheckedModeBanner: false,

@@ -18,15 +18,35 @@ class MatchScreen extends StatelessWidget {
       body: Container(
         decoration: const BoxDecoration(gradient: AppTheme.darkGradient),
         child: SafeArea(
-          child: Column(
-            children: [
-              _buildHeader(context),
-              _buildScoreBars(context),
-              _buildScoreDisplay(context),
-              Expanded(child: _buildTeamPanels(context)),
-              _buildSetSelector(context),
-              _buildActionButtons(context),
-            ],
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              // Se a altura for suficiente, usa layout com Expanded
+              if (constraints.maxHeight >= 650) {
+                return Column(
+                  children: [
+                    _buildHeader(context),
+                    _buildScoreBars(context),
+                    _buildScoreDisplay(context),
+                    Expanded(child: _buildTeamPanels(context)),
+                    _buildSetSelector(context),
+                    _buildActionButtons(context),
+                  ],
+                );
+              }
+              // Se a altura for pequena, usa scroll
+              return SingleChildScrollView(
+                child: Column(
+                  children: [
+                    _buildHeader(context),
+                    _buildScoreBars(context),
+                    _buildScoreDisplay(context),
+                    SizedBox(height: 400, child: _buildTeamPanels(context)),
+                    _buildSetSelector(context),
+                    _buildActionButtons(context),
+                  ],
+                ),
+              );
+            },
           ),
         ),
       ),
@@ -182,26 +202,26 @@ class MatchScreen extends StatelessWidget {
     int teamIndex,
   ) {
     final team = teamIndex == 0 ? game.team1 : game.team2;
+    // Passa a lista de jogadores do oponente para o painel
+    final opponentTeam = teamIndex == 0 ? game.team2 : game.team1;
 
     return TeamPanel(
       teamIndex: teamIndex,
       teamName: team.name,
       teamColor: team.primaryColor,
       score: game.getScore(teamIndex),
-      selectedPosition: teamIndex == 0
-          ? game.selectedPosition1
-          : game.selectedPosition2,
+      players: team.players,
+      opponentPlayers: opponentTeam.players,
       selectedType: teamIndex == 0 ? game.selectedType1 : game.selectedType2,
-      selectedOrigin: teamIndex == 0
-          ? game.selectedOrigin1
-          : game.selectedOrigin2,
-      selectedSetter: teamIndex == 0
-          ? game.selectedSetter1
-          : game.selectedSetter2,
-      onPositionChanged: (val) => game.setPosition(teamIndex, val),
+      selectedDetail: teamIndex == 0
+          ? game.selectedDetail1
+          : game.selectedDetail2,
+      selectedPlayerId: teamIndex == 0
+          ? game.selectedPlayer1
+          : game.selectedPlayer2,
       onTypeChanged: (val) => game.setPointType(teamIndex, val),
-      onOriginChanged: (val) => game.setOrigin(teamIndex, val),
-      onSetterChanged: (val) => game.setSetter(teamIndex, val),
+      onDetailChanged: (val) => game.setPointDetail(teamIndex, val),
+      onPlayerChanged: (val) => game.setPlayer(teamIndex, val),
       onSave: () => _savePoint(context, teamIndex),
       onDelete: () => game.removeLastPoint(teamIndex),
       onEditName: () => _showEditTeamNameDialog(context, teamIndex),
@@ -226,29 +246,36 @@ class MatchScreen extends StatelessWidget {
   }
 
   Widget _buildActionButtons(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          GradientButton(
-            text: 'SAIR',
-            icon: Icons.exit_to_app,
-            backgroundColor: AppTheme.error,
-            gradient: null,
-            onPressed: () => _showExitDialog(context),
+          Expanded(
+            child: GradientButton(
+              text: 'SAIR',
+              icon: Icons.exit_to_app,
+              backgroundColor: AppTheme.error,
+              gradient: null,
+              onPressed: () => _showExitDialog(context),
+            ),
           ),
-          GradientButton(
-            text: 'FINALIZAR SET',
-            icon: Icons.flag,
-            gradient: AppTheme.primaryGradient,
-            onPressed: () => _finishSet(context),
+          const SizedBox(width: 8),
+          Expanded(
+            child: GradientButton(
+              text: 'FINALIZAR SET',
+              icon: Icons.flag,
+              gradient: AppTheme.primaryGradient,
+              onPressed: () => _finishSet(context),
+            ),
           ),
-          GradientButton(
-            text: 'FINALIZAR JOGO',
-            icon: Icons.emoji_events,
-            gradient: AppTheme.goldGradient,
-            onPressed: () => _finishMatch(context),
+          const SizedBox(width: 8),
+          Expanded(
+            child: GradientButton(
+              text: 'FINALIZAR JOGO',
+              icon: Icons.emoji_events,
+              gradient: AppTheme.goldGradient,
+              onPressed: () => _finishMatch(context),
+            ),
           ),
         ],
       ),
