@@ -24,6 +24,25 @@ class GameService extends ChangeNotifier {
   String? _selectedPlayer1;
   String? _selectedPlayer2;
 
+  // Nome da partida (para organização de relatórios)
+  String _matchName = '';
+
+  /// Inicializa nome padrão da partida baseado na data
+  String get matchName {
+    if (_matchName.isEmpty) {
+      final now = DateTime.now();
+      _matchName =
+          'Partida ${now.day.toString().padLeft(2, '0')}-${now.month.toString().padLeft(2, '0')}-${now.year}';
+    }
+    return _matchName;
+  }
+
+  /// Define nome customizado da partida
+  void setMatchName(String name) {
+    _matchName = name.trim().isNotEmpty ? name.trim() : matchName;
+    notifyListeners();
+  }
+
   // Getters
   Team get team1 => _team1;
   Team get team2 => _team2;

@@ -1,16 +1,53 @@
-# pro_volei
+# 🏐 ProVolei
 
-A new Flutter project.
+Aplicativo para gerenciar partidas de vôlei. Feito em Flutter.
 
-## Getting Started
+## O que faz?
 
-This project is a starting point for a Flutter application.
+- Registra pontos de cada equipe (saque, bloqueio, ataque, erro)
+- Mostra estatísticas por jogador
+- Gera relatórios em PDF (por set ou partida completa)
+- Salva o histórico de partidas para consultar depois
 
-A few resources to get you started if this is your first Flutter project:
+## Rodando o projeto
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+```bash
+# Instalar dependências
+flutter pub get
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+# Rodar no dispositivo conectado
+flutter run
+```
+
+## Gerando ícones
+
+Se precisar atualizar os ícones do app:
+
+```bash
+flutter pub run flutter_launcher_icons
+```
+
+## Estrutura
+
+```
+lib/
+├── models/       # Team, Player, Point, etc.
+├── screens/      # Telas do app
+├── services/     # Game, PDF, Storage
+├── widgets/      # Componentes reutilizáveis
+└── theme/        # Cores e estilos
+```
+
+## Build
+
+```bash
+# APK para Android
+flutter build apk
+
+# Windows
+flutter build windows
+```
+
+---
+
+Desenvolvido pelo PET

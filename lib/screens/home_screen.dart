@@ -5,6 +5,7 @@ import '../models/team.dart';
 import '../services/storage_service.dart';
 import '../theme/app_theme.dart';
 import 'match_screen.dart';
+import 'reports_screen.dart';
 import 'team_list_screen.dart';
 
 /// Tela inicial do aplicativo
@@ -34,6 +35,8 @@ class HomeScreen extends StatelessWidget {
                   _buildStartButton(context),
                   const SizedBox(height: 24),
                   _buildManageTeamsButton(context),
+                  const SizedBox(height: 12),
+                  _buildReportsButton(context),
                   const SizedBox(height: 32),
                   _buildVersion(),
                 ],
@@ -144,6 +147,22 @@ class HomeScreen extends StatelessWidget {
       label: const Text(
         'GERENCIAR EQUIPES',
         style: TextStyle(color: Colors.white70, fontSize: 16),
+      ),
+    );
+  }
+
+  Widget _buildReportsButton(BuildContext context) {
+    return TextButton.icon(
+      onPressed: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const ReportsScreen()),
+        );
+      },
+      icon: const Icon(Icons.folder_open, color: Colors.white54),
+      label: const Text(
+        'VER RELATÓRIOS',
+        style: TextStyle(color: Colors.white54, fontSize: 14),
       ),
     );
   }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../services/game_service.dart';
 import '../services/pdf_service.dart';
+import '../services/report_storage_service.dart';
 import '../theme/app_theme.dart';
 import '../widgets/action_button.dart';
 import '../widgets/score_bar.dart';
@@ -63,24 +64,54 @@ class MatchScreen extends StatelessWidget {
             icon: const Icon(Icons.arrow_back_ios, color: Colors.white70),
             onPressed: () => _showExitDialog(context),
           ),
-          Row(
-            children: [
-              const Text('🏐', style: TextStyle(fontSize: 24)),
-              const SizedBox(width: 8),
-              ShaderMask(
-                shaderCallback: (bounds) =>
-                    AppTheme.goldGradient.createShader(bounds),
-                child: const Text(
-                  'PRO VOLEI',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 2,
-                  ),
-                ),
-              ),
-            ],
+          GestureDetector(
+            onTap: () => _showEditMatchNameDialog(context),
+            child: Consumer<GameService>(
+              builder: (context, game, _) {
+                return Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Text('🏐', style: TextStyle(fontSize: 20)),
+                    const SizedBox(width: 6),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        ShaderMask(
+                          shaderCallback: (bounds) =>
+                              AppTheme.goldGradient.createShader(bounds),
+                          child: const Text(
+                            'PRO VOLEI',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 1,
+                            ),
+                          ),
+                        ),
+                        Row(
+                          children: [
+                            Text(
+                              game.matchName,
+                              style: const TextStyle(
+                                color: Colors.white54,
+                                fontSize: 11,
+                              ),
+                            ),
+                            const SizedBox(width: 4),
+                            const Icon(
+                              Icons.edit,
+                              color: Colors.white38,
+                              size: 12,
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ],
+                );
+              },
+            ),
           ),
           Consumer<GameService>(
             builder: (context, game, _) {
@@ -376,6 +407,51 @@ class MatchScreen extends StatelessWidget {
     );
   }
 
+  void _showEditMatchNameDialog(BuildContext context) {
+    final game = context.read<GameService>();
+    final controller = TextEditingController(text: game.matchName);
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppTheme.cardBackground,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Text(
+          'Nome da Partida',
+          style: TextStyle(color: Colors.white),
+        ),
+        content: TextField(
+          controller: controller,
+          style: const TextStyle(color: Colors.white),
+          decoration: InputDecoration(
+            hintText: 'Ex: Campeonato Regional',
+            hintStyle: const TextStyle(color: Colors.white38),
+            filled: true,
+            fillColor: AppTheme.surfaceLight,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide.none,
+            ),
+          ),
+          autofocus: true,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('CANCELAR'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              game.setMatchName(controller.text);
+              Navigator.pop(context);
+            },
+            child: const Text('SALVAR'),
+          ),
+        ],
+      ),
+    );
+  }
+
   void _showExitDialog(BuildContext context) {
     showDialog(
       context: context,
@@ -424,21 +500,53 @@ class MatchScreen extends StatelessWidget {
       setData: setData,
       team1: game.team1,
       team2: game.team2,
+      matchName: game.matchName,
     );
 
     Navigator.pop(context);
 
     if (file != null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('PDF do Set ${setData.setNumber} salvo!'),
-          backgroundColor: AppTheme.success,
-          behavior: SnackBarBehavior.floating,
+      // Salva no storage de relatórios
+      await ReportStorageService.addSetReport(game.matchName, file.path);
+      // Mostra diálogo de confirmação
+      final shouldOpen = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          backgroundColor: AppTheme.cardBackground,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(20),
           ),
+          title: Row(
+            children: [
+              Icon(Icons.check_circle, color: AppTheme.success, size: 28),
+              const SizedBox(width: 12),
+              const Text('PDF Gerado!', style: TextStyle(color: Colors.white)),
+            ],
+          ),
+          content: Text(
+            'Relatório do Set ${setData.setNumber} salvo com sucesso.',
+            style: const TextStyle(color: Colors.white70),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('FECHAR'),
+            ),
+            ElevatedButton.icon(
+              onPressed: () => Navigator.pop(context, true),
+              icon: const Icon(Icons.open_in_new, size: 18),
+              label: const Text('ABRIR PDF'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppTheme.primaryBlue,
+              ),
+            ),
+          ],
         ),
       );
+
+      if (shouldOpen == true) {
+        await PdfService.openPdf(file);
+      }
     }
   }
 
@@ -461,21 +569,56 @@ class MatchScreen extends StatelessWidget {
       totalStats2: game.getTotalStats(1),
       setsWon1: game.getSetsWon(0),
       setsWon2: game.getSetsWon(1),
+      matchName: game.matchName,
     );
 
     Navigator.pop(context);
 
     if (file != null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text('Relatório da partida salvo!'),
-          backgroundColor: AppTheme.success,
-          behavior: SnackBarBehavior.floating,
+      // Salva no storage de relatórios (e finaliza a partida)
+      await ReportStorageService.addFinalReport(game.matchName, file.path);
+      // Mostra diálogo de confirmação
+      final shouldOpen = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          backgroundColor: AppTheme.cardBackground,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(20),
           ),
+          title: Row(
+            children: [
+              Icon(Icons.emoji_events, color: AppTheme.primaryGold, size: 28),
+              const SizedBox(width: 12),
+              const Text(
+                'Partida Finalizada!',
+                style: TextStyle(color: Colors.white),
+              ),
+            ],
+          ),
+          content: const Text(
+            'Relatório completo da partida salvo com sucesso.',
+            style: TextStyle(color: Colors.white70),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('FECHAR'),
+            ),
+            ElevatedButton.icon(
+              onPressed: () => Navigator.pop(context, true),
+              icon: const Icon(Icons.open_in_new, size: 18),
+              label: const Text('ABRIR PDF'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppTheme.primaryGold,
+              ),
+            ),
+          ],
         ),
       );
+
+      if (shouldOpen == true) {
+        await PdfService.openPdf(file);
+      }
     }
   }
 }

@@ -1,20 +1,35 @@
-// This is a basic Flutter widget test.
+// Testes básicos do ProVolei
 //
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
+// Para rodar: flutter test
 
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import 'package:pro_volei/main.dart';
+import 'package:provider/provider.dart';
+import 'package:pro_volei/services/game_service.dart';
+import 'package:pro_volei/services/storage_service.dart';
+import 'package:pro_volei/screens/home_screen.dart';
+import 'package:pro_volei/theme/app_theme.dart';
 
 void main() {
   testWidgets('App loads successfully', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const ProVoleiApp());
+    // Cria serviços mock
+    final storageService = StorageService();
 
-    // Verify that the app loads
+    // Build widget com providers
+    await tester.pumpWidget(
+      MultiProvider(
+        providers: [
+          ChangeNotifierProvider.value(value: storageService),
+          ChangeNotifierProvider(create: (_) => GameService()),
+        ],
+        child: MaterialApp(theme: AppTheme.darkTheme, home: const HomeScreen()),
+      ),
+    );
+
+    // Aguarda renderização
+    await tester.pump();
+
+    // Verifica que o app carregou
     expect(find.text('PRO VOLEI'), findsOneWidget);
   });
 }
