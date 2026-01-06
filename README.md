@@ -50,4 +50,6 @@ flutter build windows
 
 ---
 
-Desenvolvido pelo PET
+Desenvolvido pelo PET Computação UFMS:
+João Victor Zuanazzi Lourenço
+Caio Kwiatkoski Mendes
