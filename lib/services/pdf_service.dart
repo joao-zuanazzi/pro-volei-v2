@@ -40,12 +40,15 @@ class PdfService {
           _buildChart(stats1, stats2),
           pw.SizedBox(height: 20),
           _buildLegend(team1.name, team2.name),
+          // Página nova para estatísticas de jogadores
           if (team1.players.isNotEmpty || team2.players.isNotEmpty) ...[
-            pw.SizedBox(height: 40),
+            pw.NewPage(),
             _buildPlayerStatsTable([setData], team1, team2),
             pw.SizedBox(height: 30),
             _buildPlayerErrorsTable([setData], team1, team2),
           ],
+          pw.SizedBox(height: 30),
+          _buildPointDetailsTable([setData], team1.name, team2.name),
         ],
       ),
     );
@@ -94,12 +97,15 @@ class PdfService {
           _buildLegend(team1.name, team2.name),
           pw.SizedBox(height: 40),
           _buildSetsBreakdown(sets, team1.name, team2.name),
+          // Página nova para estatísticas de jogadores
           if (team1.players.isNotEmpty || team2.players.isNotEmpty) ...[
-            pw.SizedBox(height: 40),
+            pw.NewPage(),
             _buildPlayerStatsTable(sets, team1, team2),
             pw.SizedBox(height: 30),
             _buildPlayerErrorsTable(sets, team1, team2),
           ],
+          pw.SizedBox(height: 30),
+          _buildPointDetailsTable(sets, team1.name, team2.name),
         ],
       ),
     );
@@ -659,6 +665,159 @@ class PdfService {
     );
   }
 
+  /// Tabela detalhada de pontos por tipo e detalhe
+  static pw.Widget _buildPointDetailsTable(
+    List<SetData> sets,
+    String team1Name,
+    String team2Name,
+  ) {
+    // Conta pontos por tipo e detalhe para cada time
+    Map<String, Map<String, int>> getDetailedStats(int teamIndex) {
+      final stats = <String, Map<String, int>>{};
+
+      for (final set in sets) {
+        final points = set.points.where((p) => p.teamIndex == teamIndex);
+        for (final point in points) {
+          final typeLabel = point.type.label;
+          final detailLabel = point.detail?.label ?? 'N/A';
+
+          if (!stats.containsKey(typeLabel)) {
+            stats[typeLabel] = {};
+          }
+          stats[typeLabel]![detailLabel] =
+              (stats[typeLabel]![detailLabel] ?? 0) + 1;
+        }
+      }
+      return stats;
+    }
+
+    final stats1 = getDetailedStats(0);
+    final stats2 = getDetailedStats(1);
+
+    // Cria linhas da tabela
+    List<pw.TableRow> buildRows(
+      Map<String, Map<String, int>> stats,
+      String teamName,
+    ) {
+      final rows = <pw.TableRow>[];
+
+      // Header do time
+      rows.add(
+        pw.TableRow(
+          decoration: const pw.BoxDecoration(color: PdfColors.blueGrey600),
+          children: [
+            pw.Padding(
+              padding: const pw.EdgeInsets.all(8),
+              child: pw.Text(
+                teamName,
+                style: pw.TextStyle(
+                  color: PdfColors.white,
+                  fontWeight: pw.FontWeight.bold,
+                ),
+              ),
+            ),
+            pw.Padding(padding: const pw.EdgeInsets.all(8), child: pw.Text('')),
+            pw.Padding(padding: const pw.EdgeInsets.all(8), child: pw.Text('')),
+          ],
+        ),
+      );
+
+      stats.forEach((type, details) {
+        final total = details.values.fold(0, (a, b) => a + b);
+        final detailStr = details.entries
+            .map((e) => '${e.value} ${e.key}')
+            .join(', ');
+
+        rows.add(
+          pw.TableRow(
+            children: [
+              pw.Padding(
+                padding: const pw.EdgeInsets.only(left: 16, top: 4, bottom: 4),
+                child: pw.Text(
+                  type,
+                  style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
+                ),
+              ),
+              pw.Padding(
+                padding: const pw.EdgeInsets.all(4),
+                child: pw.Text('$total', textAlign: pw.TextAlign.center),
+              ),
+              pw.Padding(
+                padding: const pw.EdgeInsets.all(4),
+                child: pw.Text(
+                  detailStr,
+                  style: const pw.TextStyle(fontSize: 9),
+                ),
+              ),
+            ],
+          ),
+        );
+      });
+
+      return rows;
+    }
+
+    return pw.Column(
+      crossAxisAlignment: pw.CrossAxisAlignment.start,
+      children: [
+        pw.Text(
+          'DETALHAMENTO DOS PONTOS',
+          style: pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold),
+        ),
+        pw.SizedBox(height: 10),
+        pw.Table(
+          border: pw.TableBorder.all(color: PdfColors.grey400),
+          columnWidths: {
+            0: const pw.FlexColumnWidth(2),
+            1: const pw.FlexColumnWidth(1),
+            2: const pw.FlexColumnWidth(4),
+          },
+          children: [
+            // Header
+            pw.TableRow(
+              decoration: const pw.BoxDecoration(color: PdfColors.blueGrey700),
+              children: [
+                pw.Padding(
+                  padding: const pw.EdgeInsets.all(8),
+                  child: pw.Text(
+                    'Tipo',
+                    style: pw.TextStyle(
+                      color: PdfColors.white,
+                      fontWeight: pw.FontWeight.bold,
+                    ),
+                  ),
+                ),
+                pw.Padding(
+                  padding: const pw.EdgeInsets.all(8),
+                  child: pw.Text(
+                    'Total',
+                    style: pw.TextStyle(
+                      color: PdfColors.white,
+                      fontWeight: pw.FontWeight.bold,
+                    ),
+                    textAlign: pw.TextAlign.center,
+                  ),
+                ),
+                pw.Padding(
+                  padding: const pw.EdgeInsets.all(8),
+                  child: pw.Text(
+                    'Detalhes',
+                    style: pw.TextStyle(
+                      color: PdfColors.white,
+                      fontWeight: pw.FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            ...buildRows(stats1, team1Name),
+            ...buildRows(stats2, team2Name),
+          ],
+        ),
+      ],
+    );
+  }
+
   // Componentes do PDF
   static pw.Widget _buildHeader(String title) {
     return pw.Container(
@@ -671,7 +830,7 @@ class PdfService {
       child: pw.Column(
         children: [
           pw.Text(
-            'PRO VOLEI',
+            'PRÓ-VÔLEI SPY',
             style: pw.TextStyle(
               fontSize: 14,
               color: PdfColors.amber,
@@ -881,6 +1040,36 @@ class PdfService {
         pw.SizedBox(width: 8),
         pw.Text(team2),
       ],
+    );
+  }
+
+  /// Seção completa do gráfico com título, gráfico e legenda
+  static pw.Widget _buildChartSection(
+    String team1Name,
+    String team2Name,
+    TeamStats stats1,
+    TeamStats stats2,
+  ) {
+    return pw.Container(
+      padding: const pw.EdgeInsets.all(20),
+      decoration: pw.BoxDecoration(
+        border: pw.Border.all(color: PdfColors.grey300, width: 1),
+        borderRadius: pw.BorderRadius.circular(8),
+      ),
+      child: pw.Column(
+        crossAxisAlignment: pw.CrossAxisAlignment.start,
+        children: [
+          pw.Text(
+            'GRÁFICO COMPARATIVO',
+            style: pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold),
+          ),
+          pw.SizedBox(height: 15),
+          // Altura fixa menor para caber junto com título
+          pw.SizedBox(height: 180, child: _buildChart(stats1, stats2)),
+          pw.SizedBox(height: 15),
+          _buildLegend(team1Name, team2Name),
+        ],
+      ),
     );
   }
 

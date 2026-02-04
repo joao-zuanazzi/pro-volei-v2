@@ -63,4 +63,26 @@ class SetData {
       winnerTeamIndex: score0 > score1 ? 0 : (score1 > score0 ? 1 : null),
     );
   }
+
+  /// Troca os índices de equipe de todos os pontos (0↔1)
+  /// Usado quando o usuário clica no VS para trocar lados
+  SetData swapTeamIndices() {
+    final swappedPoints = points.map((p) {
+      return Point(
+        teamIndex: p.teamIndex == 0 ? 1 : 0,
+        type: p.type,
+        detail: p.detail,
+        playerId: p.playerId,
+      );
+    }).toList();
+
+    return SetData(
+      setNumber: setNumber,
+      points: swappedPoints,
+      isFinished: isFinished,
+      winnerTeamIndex: winnerTeamIndex == null
+          ? null
+          : (winnerTeamIndex == 0 ? 1 : 0),
+    );
+  }
 }

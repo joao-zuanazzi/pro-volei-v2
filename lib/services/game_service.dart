@@ -27,6 +27,21 @@ class GameService extends ChangeNotifier {
   // Nome da partida (para organização de relatórios)
   String _matchName = '';
 
+  // Cronômetro
+  DateTime _matchStartTime = DateTime.now();
+  DateTime _setStartTime = DateTime.now();
+
+  /// Tempo decorrido da partida
+  Duration get matchDuration => DateTime.now().difference(_matchStartTime);
+
+  /// Tempo decorrido do set atual
+  Duration get setDuration => DateTime.now().difference(_setStartTime);
+
+  /// Reseta o cronômetro do set
+  void resetSetTimer() {
+    _setStartTime = DateTime.now();
+  }
+
   /// Inicializa nome padrão da partida baseado na data
   String get matchName {
     if (_matchName.isEmpty) {
@@ -40,6 +55,31 @@ class GameService extends ChangeNotifier {
   /// Define nome customizado da partida
   void setMatchName(String name) {
     _matchName = name.trim().isNotEmpty ? name.trim() : matchName;
+    notifyListeners();
+  }
+
+  /// Troca os lados das equipes (esquerda/direita)
+  void swapTeams() {
+    final tempTeam = _team1;
+    _team1 = _team2;
+    _team2 = tempTeam;
+
+    // Troca seleções temporárias
+    final tempType = _selectedType1;
+    _selectedType1 = _selectedType2;
+    _selectedType2 = tempType;
+
+    final tempDetail = _selectedDetail1;
+    _selectedDetail1 = _selectedDetail2;
+    _selectedDetail2 = tempDetail;
+
+    final tempPlayer = _selectedPlayer1;
+    _selectedPlayer1 = _selectedPlayer2;
+    _selectedPlayer2 = tempPlayer;
+
+    // Troca os índices de equipe em todos os sets para que os pontos sigam as equipes
+    _sets = _sets.map((s) => s.swapTeamIndices()).toList();
+
     notifyListeners();
   }
 
@@ -133,14 +173,23 @@ class GameService extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Limite máximo de pontos por set
-  static const int maxPointsPerSet = 25;
+  /// Mínimo de pontos para vencer o set
+  static const int minPointsToWin = 25;
+
+  /// Verifica se o set já foi finalizado
+  bool isSetFinished() {
+    final s1 = getScore(0);
+    final s2 = getScore(1);
+    // Uma equipe venceu se tem >= 25 pontos E 2+ pontos de vantagem
+    return (s1 >= minPointsToWin || s2 >= minPointsToWin) &&
+        (s1 - s2).abs() >= 2;
+  }
 
   /// Adiciona um ponto para a equipe
-  /// Retorna false se tipo/detalhe não selecionado ou limite atingido
+  /// Retorna false se tipo/detalhe não selecionado ou set finalizado
   bool addPoint(int teamIndex) {
-    // Verificar limite de pontos
-    if (getScore(teamIndex) >= maxPointsPerSet) {
+    // Verificar se o set já foi finalizado
+    if (isSetFinished()) {
       return false;
     }
 
@@ -236,5 +285,39 @@ class GameService extends ChangeNotifier {
     _selectedType2 = null;
     _selectedDetail2 = null;
     _selectedPlayer2 = null;
+  }
+
+  /// [DEBUG/TEST] Gera pontos aleatórios para teste rápido
+  void generateRandomPoints({int count = 10}) {
+    final random = DateTime.now().millisecondsSinceEpoch;
+    final types = PointType.values;
+
+    for (int i = 0; i < count; i++) {
+      // Alterna entre time 0 e 1 com variação
+      final teamIndex = (random + i) % 3 == 0 ? 1 : ((random + i) % 2);
+      final type = types[(random + i) % types.length];
+
+      // Seleciona detalhe válido para o tipo
+      final details = type.availableDetails;
+      final detail = details[(random + i) % details.length];
+
+      // Jogador aleatório se a equipe tem jogadores
+      final team = teamIndex == 0 ? _team1 : _team2;
+      String? playerId;
+      if (team.players.isNotEmpty) {
+        playerId = team.players[(random + i) % team.players.length].id;
+      }
+
+      final point = Point(
+        teamIndex: teamIndex,
+        type: type,
+        detail: detail,
+        playerId: playerId,
+      );
+
+      _sets[_currentSetIndex] = currentSet.addPoint(point);
+    }
+
+    notifyListeners();
   }
 }

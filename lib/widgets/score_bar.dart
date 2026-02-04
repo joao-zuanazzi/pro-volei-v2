@@ -70,6 +70,7 @@ class ScoreDisplay extends StatelessWidget {
   final int score2;
   final String team1Name;
   final String team2Name;
+  final VoidCallback? onSwapTeams;
 
   const ScoreDisplay({
     super.key,
@@ -77,6 +78,7 @@ class ScoreDisplay extends StatelessWidget {
     required this.score2,
     required this.team1Name,
     required this.team2Name,
+    this.onSwapTeams,
   });
 
   @override
@@ -97,9 +99,13 @@ class ScoreDisplay extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          _buildTeamScore(team1Name, score1, AppTheme.team1Color),
+          Expanded(
+            child: _buildTeamScore(team1Name, score1, AppTheme.team1Color),
+          ),
           _buildVs(),
-          _buildTeamScore(team2Name, score2, AppTheme.team2Color),
+          Expanded(
+            child: _buildTeamScore(team2Name, score2, AppTheme.team2Color),
+          ),
         ],
       ),
     );
@@ -115,6 +121,8 @@ class ScoreDisplay extends StatelessWidget {
             fontSize: 14,
             fontWeight: FontWeight.w600,
           ),
+          textAlign: TextAlign.center,
+          overflow: TextOverflow.ellipsis,
         ),
         const SizedBox(height: 8),
         TweenAnimationBuilder<int>(
@@ -139,18 +147,28 @@ class ScoreDisplay extends StatelessWidget {
   }
 
   Widget _buildVs() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      decoration: BoxDecoration(
-        color: AppTheme.surfaceLight,
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: const Text(
-        'VS',
-        style: TextStyle(
-          color: Colors.white54,
-          fontSize: 16,
-          fontWeight: FontWeight.bold,
+    return GestureDetector(
+      onTap: onSwapTeams,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          color: AppTheme.surfaceLight,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              'VS',
+              style: TextStyle(
+                color: Colors.white54,
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            if (onSwapTeams != null)
+              const Icon(Icons.swap_horiz, color: Colors.white38, size: 14),
+          ],
         ),
       ),
     );

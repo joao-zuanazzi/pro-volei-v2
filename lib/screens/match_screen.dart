@@ -26,7 +26,6 @@ class MatchScreen extends StatelessWidget {
                 return Column(
                   children: [
                     _buildHeader(context),
-                    _buildScoreBars(context),
                     _buildScoreDisplay(context),
                     Expanded(child: _buildTeamPanels(context)),
                     _buildSetSelector(context),
@@ -39,7 +38,6 @@ class MatchScreen extends StatelessWidget {
                 child: Column(
                   children: [
                     _buildHeader(context),
-                    _buildScoreBars(context),
                     _buildScoreDisplay(context),
                     SizedBox(height: 400, child: _buildTeamPanels(context)),
                     _buildSetSelector(context),
@@ -58,103 +56,116 @@ class MatchScreen extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          IconButton(
-            icon: const Icon(Icons.arrow_back_ios, color: Colors.white70),
-            onPressed: () => _showExitDialog(context),
+          // Botão voltar - SizedBox com largura fixa para balancear com o timer
+          SizedBox(
+            width: 80, // Mesma largura aproximada do timer
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: IconButton(
+                icon: const Icon(Icons.arrow_back_ios, color: Colors.white70),
+                onPressed: () => _showExitDialog(context),
+              ),
+            ),
           ),
-          GestureDetector(
-            onTap: () => _showEditMatchNameDialog(context),
-            child: Consumer<GameService>(
-              builder: (context, game, _) {
-                return Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Text('🏐', style: TextStyle(fontSize: 20)),
-                    const SizedBox(width: 6),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        ShaderMask(
-                          shaderCallback: (bounds) =>
-                              AppTheme.goldGradient.createShader(bounds),
-                          child: const Text(
-                            'PRO VOLEI',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 14,
-                              fontWeight: FontWeight.bold,
-                              letterSpacing: 1,
-                            ),
+          // Centro: Título + nome da partida (expansível)
+          Expanded(
+            child: GestureDetector(
+              onTap: () => _showEditMatchNameDialog(context),
+              child: Consumer<GameService>(
+                builder: (context, game, _) {
+                  return Column(
+                    children: [
+                      ShaderMask(
+                        shaderCallback: (bounds) =>
+                            AppTheme.goldGradient.createShader(bounds),
+                        child: const Text(
+                          'PRÓ-VÔLEI SPY',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 2,
                           ),
                         ),
-                        Row(
-                          children: [
-                            Text(
-                              game.matchName,
-                              style: const TextStyle(
-                                color: Colors.white54,
-                                fontSize: 11,
-                              ),
+                      ),
+                      const SizedBox(height: 4),
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            game.matchName,
+                            style: const TextStyle(
+                              color: Colors.white54,
+                              fontSize: 12,
                             ),
-                            const SizedBox(width: 4),
-                            const Icon(
-                              Icons.edit,
-                              color: Colors.white38,
-                              size: 12,
-                            ),
-                          ],
+                          ),
+                          const SizedBox(width: 4),
+                          const Icon(
+                            Icons.edit,
+                            color: Colors.white38,
+                            size: 12,
+                          ),
+                        ],
+                      ),
+                    ],
+                  );
+                },
+              ),
+            ),
+          ),
+          // Timer à direita - Long press gera pontos aleatórios para teste
+          GestureDetector(
+            onLongPress: () {
+              context.read<GameService>().generateRandomPoints(count: 15);
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('🧪 +15 pontos aleatórios gerados'),
+                  duration: Duration(seconds: 1),
+                ),
+              );
+            },
+            child: StreamBuilder(
+              stream: Stream.periodic(const Duration(seconds: 1)),
+              builder: (context, _) {
+                final game = context.read<GameService>();
+                final matchTime = game.matchDuration;
+                final m = matchTime.inMinutes.toString().padLeft(2, '0');
+                final s = (matchTime.inSeconds % 60).toString().padLeft(2, '0');
+                return Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppTheme.surfaceLight,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(
+                        Icons.timer_outlined,
+                        color: Colors.white54,
+                        size: 16,
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        '$m:$s',
+                        style: const TextStyle(
+                          color: Colors.white70,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
                         ),
-                      ],
-                    ),
-                  ],
+                      ),
+                    ],
+                  ),
                 );
               },
             ),
           ),
-          Consumer<GameService>(
-            builder: (context, game, _) {
-              return Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 6,
-                ),
-                decoration: BoxDecoration(
-                  color: AppTheme.surfaceLight,
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Text(
-                  'SET ${game.currentSetIndex + 1}',
-                  style: const TextStyle(
-                    color: Colors.white70,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              );
-            },
-          ),
         ],
       ),
-    );
-  }
-
-  Widget _buildScoreBars(BuildContext context) {
-    return Consumer<GameService>(
-      builder: (context, game, _) {
-        return Column(
-          children: [
-            ScoreBar(score: game.getScore(0), activeColor: AppTheme.team1Color),
-            const SizedBox(height: 4),
-            ScoreBar(
-              score: game.getScore(1),
-              activeColor: AppTheme.team2Color,
-              isReversed: true,
-            ),
-          ],
-        );
-      },
     );
   }
 
@@ -168,6 +179,7 @@ class MatchScreen extends StatelessWidget {
             score2: game.getScore(1),
             team1Name: game.team1.name,
             team2Name: game.team2.name,
+            onSwapTeams: () => game.swapTeams(),
           ),
         );
       },
@@ -316,7 +328,6 @@ class MatchScreen extends StatelessWidget {
   void _savePoint(BuildContext context, int teamIndex) {
     final game = context.read<GameService>();
     final type = teamIndex == 0 ? game.selectedType1 : game.selectedType2;
-    final score = game.getScore(teamIndex);
 
     if (type == null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -332,10 +343,10 @@ class MatchScreen extends StatelessWidget {
       return;
     }
 
-    if (score >= GameService.maxPointsPerSet) {
+    if (game.isSetFinished()) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Text('Limite de 25 pontos atingido! Finalize o set.'),
+          content: const Text('Set finalizado! Clique em "Finalizar Set".'),
           backgroundColor: AppTheme.warning,
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(

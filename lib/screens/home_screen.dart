@@ -50,20 +50,25 @@ class HomeScreen extends StatelessWidget {
 
   Widget _buildLogo() {
     return Container(
-      width: 140,
+      width: 220,
       height: 140,
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        gradient: AppTheme.goldGradient,
+        color: const Color(0xFF1A1A2E), // Fundo escuro que combina com tema
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: AppTheme.primaryGold.withValues(alpha: 0.3),
+          width: 2,
+        ),
         boxShadow: [
           BoxShadow(
-            color: AppTheme.primaryGold.withValues(alpha: 0.4),
-            blurRadius: 30,
-            spreadRadius: 5,
+            color: AppTheme.primaryGold.withValues(alpha: 0.2),
+            blurRadius: 20,
+            spreadRadius: 2,
           ),
         ],
       ),
-      child: const Center(child: Text('🏐', style: TextStyle(fontSize: 70))),
+      child: Image.asset('assets/icon.png', fit: BoxFit.contain),
     );
   }
 
@@ -73,12 +78,12 @@ class HomeScreen extends StatelessWidget {
         colors: [AppTheme.primaryGold, Color(0xFFE8C468)],
       ).createShader(bounds),
       child: const Text(
-        'PRO VOLEI',
+        'PRÓ-VÔLEI SPY',
         style: TextStyle(
-          fontSize: 42,
+          fontSize: 36,
           fontWeight: FontWeight.bold,
           color: Colors.white,
-          letterSpacing: 4,
+          letterSpacing: 2,
         ),
       ),
     );
