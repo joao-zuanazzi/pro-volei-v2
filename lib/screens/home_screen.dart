@@ -18,57 +18,79 @@ class HomeScreen extends StatelessWidget {
       body: Container(
         decoration: const BoxDecoration(gradient: AppTheme.darkGradient),
         child: SafeArea(
-          child: Center(
-            child: Padding(
-              padding: const EdgeInsets.all(32),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Spacer(),
-                  _buildLogo(),
-                  const SizedBox(height: 16),
-                  _buildTitle(),
-                  const SizedBox(height: 8),
-                  _buildSubtitle(),
-                  const Spacer(),
-                  const Spacer(),
-                  _buildStartButton(context),
-                  const SizedBox(height: 24),
-                  _buildManageTeamsButton(context),
-                  const SizedBox(height: 12),
-                  _buildReportsButton(context),
-                  const SizedBox(height: 32),
-                  _buildVersion(),
-                ],
-              ),
-            ),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final isLandscape = constraints.maxWidth > constraints.maxHeight;
+              final isDesktop = constraints.maxHeight > 600;
+
+              // PC: 280px, Celular portrait: 300px, Celular landscape: 140px
+              final logoHeight = isDesktop
+                  ? 280.0
+                  : (isLandscape ? 140.0 : 300.0);
+
+              // Em landscape usa scroll centrado, em portrait usa layout fixo
+              if (isLandscape) {
+                return Center(
+                  child: SingleChildScrollView(
+                    child: Padding(
+                      padding: const EdgeInsets.all(24),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          _buildLogo(logoHeight),
+                          const SizedBox(height: 12),
+                          _buildSubtitle(),
+                          const SizedBox(height: 20),
+                          _buildStartButton(context),
+                          const SizedBox(height: 12),
+                          _buildManageTeamsButton(context),
+                          const SizedBox(height: 8),
+                          _buildReportsButton(context),
+                          const SizedBox(height: 16),
+                          _buildVersion(),
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              }
+
+              // Portrait: layout original com Spacers
+              return Padding(
+                padding: const EdgeInsets.all(32),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Spacer(),
+                    _buildLogo(logoHeight),
+                    const SizedBox(height: 16),
+                    _buildSubtitle(),
+                    const Spacer(),
+                    const Spacer(),
+                    _buildStartButton(context),
+                    const SizedBox(height: 24),
+                    _buildManageTeamsButton(context),
+                    const SizedBox(height: 12),
+                    _buildReportsButton(context),
+                    const SizedBox(height: 32),
+                    _buildVersion(),
+                  ],
+                ),
+              );
+            },
           ),
         ),
       ),
     );
   }
 
-  Widget _buildLogo() {
-    return Container(
-      width: 220,
-      height: 140,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: const Color(0xFF1A1A2E), // Fundo escuro que combina com tema
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: AppTheme.primaryGold.withValues(alpha: 0.3),
-          width: 2,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: AppTheme.primaryGold.withValues(alpha: 0.2),
-            blurRadius: 20,
-            spreadRadius: 2,
-          ),
-        ],
-      ),
-      child: Image.asset('assets/icon.png', fit: BoxFit.contain),
+  Widget _buildLogo(double height) {
+    // Mantém proporção da logo (largura ≈ 1.45x altura)
+    final width = height * 1.45;
+    return SizedBox(
+      width: width,
+      height: height,
+      child: Image.asset('assets/logo.png', fit: BoxFit.contain),
     );
   }
 
@@ -211,23 +233,25 @@ class _MatchSetupDialogState extends State<MatchSetupDialog> {
         'Configurar Partida',
         style: TextStyle(color: Colors.white),
       ),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          _buildTeamSelector(
-            'Equipe 1',
-            teams,
-            _team1Id,
-            (val) => setState(() => _team1Id = val),
-          ),
-          const SizedBox(height: 16),
-          _buildTeamSelector(
-            'Equipe 2',
-            teams,
-            _team2Id,
-            (val) => setState(() => _team2Id = val),
-          ),
-        ],
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _buildTeamSelector(
+              'Equipe 1',
+              teams,
+              _team1Id,
+              (val) => setState(() => _team1Id = val),
+            ),
+            const SizedBox(height: 16),
+            _buildTeamSelector(
+              'Equipe 2',
+              teams,
+              _team2Id,
+              (val) => setState(() => _team2Id = val),
+            ),
+          ],
+        ),
       ),
       actions: [
         TextButton(

@@ -7,12 +7,14 @@ class SetData {
   final List<Point> points;
   final bool isFinished;
   final int? winnerTeamIndex;
+  final Duration? duration;
 
   const SetData({
     required this.setNumber,
     this.points = const [],
     this.isFinished = false,
     this.winnerTeamIndex,
+    this.duration,
   });
 
   /// Placar da equipe
@@ -32,6 +34,7 @@ class SetData {
       points: [...points, point],
       isFinished: isFinished,
       winnerTeamIndex: winnerTeamIndex,
+      duration: duration,
     );
   }
 
@@ -49,11 +52,12 @@ class SetData {
       points: newPoints,
       isFinished: isFinished,
       winnerTeamIndex: winnerTeamIndex,
+      duration: duration,
     );
   }
 
-  /// Finaliza o set
-  SetData finish() {
+  /// Finaliza o set com duração
+  SetData finish({Duration? setDuration}) {
     final score0 = getScore(0);
     final score1 = getScore(1);
     return SetData(
@@ -61,6 +65,7 @@ class SetData {
       points: points,
       isFinished: true,
       winnerTeamIndex: score0 > score1 ? 0 : (score1 > score0 ? 1 : null),
+      duration: setDuration ?? duration,
     );
   }
 
@@ -83,6 +88,7 @@ class SetData {
       winnerTeamIndex: winnerTeamIndex == null
           ? null
           : (winnerTeamIndex == 0 ? 1 : 0),
+      duration: duration,
     );
   }
 }

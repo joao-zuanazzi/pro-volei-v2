@@ -34,6 +34,15 @@ class PdfService {
             stats1.score,
             stats2.score,
           ),
+          if (setData.duration != null) ...[
+            pw.SizedBox(height: 8),
+            pw.Center(
+              child: pw.Text(
+                'Duração do Set: ${_formatDuration(setData.duration!)}',
+                style: pw.TextStyle(fontSize: 12, color: PdfColors.grey600),
+              ),
+            ),
+          ],
           pw.SizedBox(height: 30),
           _buildStatsTable(team1.name, team2.name, stats1, stats2),
           pw.SizedBox(height: 40),
@@ -904,29 +913,31 @@ class PdfService {
     int sets2,
   ) {
     final winner = sets1 > sets2 ? team1 : (sets2 > sets1 ? team2 : 'Empate');
-    return pw.Container(
-      padding: const pw.EdgeInsets.all(16),
-      decoration: pw.BoxDecoration(
-        border: pw.Border.all(color: PdfColors.amber, width: 2),
-        borderRadius: pw.BorderRadius.circular(8),
-      ),
-      child: pw.Column(
-        children: [
-          pw.Text(
-            'VENCEDOR',
-            style: const pw.TextStyle(fontSize: 12, color: PdfColors.grey700),
-          ),
-          pw.SizedBox(height: 4),
-          pw.Text(
-            winner,
-            style: pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold),
-          ),
-          pw.SizedBox(height: 8),
-          pw.Text(
-            '$sets1 x $sets2 sets',
-            style: const pw.TextStyle(fontSize: 16),
-          ),
-        ],
+    return pw.Center(
+      child: pw.Container(
+        padding: const pw.EdgeInsets.all(16),
+        decoration: pw.BoxDecoration(
+          border: pw.Border.all(color: PdfColors.amber, width: 2),
+          borderRadius: pw.BorderRadius.circular(8),
+        ),
+        child: pw.Column(
+          children: [
+            pw.Text(
+              'VENCEDOR',
+              style: const pw.TextStyle(fontSize: 12, color: PdfColors.grey700),
+            ),
+            pw.SizedBox(height: 4),
+            pw.Text(
+              winner,
+              style: pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold),
+            ),
+            pw.SizedBox(height: 8),
+            pw.Text(
+              '$sets1 x $sets2 sets',
+              style: const pw.TextStyle(fontSize: 16),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -1132,6 +1143,16 @@ class PdfService {
                     ),
                   ),
                 ),
+                pw.Padding(
+                  padding: const pw.EdgeInsets.all(8),
+                  child: pw.Text(
+                    'Duração',
+                    style: pw.TextStyle(
+                      color: PdfColors.white,
+                      fontWeight: pw.FontWeight.bold,
+                    ),
+                  ),
+                ),
               ],
             ),
             ...sets.where((s) => s.isFinished).map((set) {
@@ -1140,6 +1161,9 @@ class PdfService {
               final winner = set.winnerTeamIndex == 0
                   ? team1
                   : (set.winnerTeamIndex == 1 ? team2 : '-');
+              final durationText = set.duration != null
+                  ? _formatDuration(set.duration!)
+                  : '-';
               return pw.TableRow(
                 children: [
                   pw.Padding(
@@ -1158,10 +1182,71 @@ class PdfService {
                     padding: const pw.EdgeInsets.all(8),
                     child: pw.Text(winner),
                   ),
+                  pw.Padding(
+                    padding: const pw.EdgeInsets.all(8),
+                    child: pw.Text(durationText),
+                  ),
                 ],
               );
             }),
+            // Linha de tempo total
+            _buildTotalTimeRow(sets),
           ],
+        ),
+      ],
+    );
+  }
+
+  /// Formata Duration como MM:SS
+  static String _formatDuration(Duration d) {
+    final minutes = d.inMinutes;
+    final seconds = d.inSeconds % 60;
+    return '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
+  }
+
+  /// Linha de tempo total na tabela de sets
+  static pw.TableRow _buildTotalTimeRow(List<SetData> sets) {
+    final finishedSets = sets.where((s) => s.isFinished && s.duration != null);
+    if (finishedSets.isEmpty) {
+      return pw.TableRow(
+        children: [
+          pw.Padding(
+            padding: const pw.EdgeInsets.all(8),
+            child: pw.Text(
+              'Total',
+              style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
+            ),
+          ),
+          pw.Padding(padding: const pw.EdgeInsets.all(8), child: pw.Text('')),
+          pw.Padding(padding: const pw.EdgeInsets.all(8), child: pw.Text('')),
+          pw.Padding(padding: const pw.EdgeInsets.all(8), child: pw.Text('')),
+          pw.Padding(padding: const pw.EdgeInsets.all(8), child: pw.Text('-')),
+        ],
+      );
+    }
+    final totalDuration = finishedSets.fold<Duration>(
+      Duration.zero,
+      (sum, s) => sum + s.duration!,
+    );
+    return pw.TableRow(
+      decoration: const pw.BoxDecoration(color: PdfColors.grey200),
+      children: [
+        pw.Padding(
+          padding: const pw.EdgeInsets.all(8),
+          child: pw.Text(
+            'Total',
+            style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
+          ),
+        ),
+        pw.Padding(padding: const pw.EdgeInsets.all(8), child: pw.Text('')),
+        pw.Padding(padding: const pw.EdgeInsets.all(8), child: pw.Text('')),
+        pw.Padding(padding: const pw.EdgeInsets.all(8), child: pw.Text('')),
+        pw.Padding(
+          padding: const pw.EdgeInsets.all(8),
+          child: pw.Text(
+            _formatDuration(totalDuration),
+            style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
+          ),
         ),
       ],
     );

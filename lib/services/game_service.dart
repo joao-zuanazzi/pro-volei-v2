@@ -246,8 +246,12 @@ class GameService extends ChangeNotifier {
 
   /// Finaliza o set atual
   SetData finishCurrentSet() {
-    _sets[_currentSetIndex] = currentSet.finish();
+    final elapsed = setDuration;
+    _sets[_currentSetIndex] = currentSet.finish(setDuration: elapsed);
     final finishedSet = currentSet;
+
+    // Reseta o timer para o próximo set
+    resetSetTimer();
 
     // Avança para próximo set se possível
     if (_currentSetIndex < 4) {
