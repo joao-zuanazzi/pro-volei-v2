@@ -255,10 +255,11 @@ class GameService extends ChangeNotifier {
     if (type == null || detail == null) return false;
 
     // Se a equipe tem jogadores cadastrados, validar se jogador foi selecionado
+    // Exceto para erro do adversário, onde o jogador não é atribuído
     final team = teamIndex == 0 ? _team1 : _team2;
-    if (team.players.isNotEmpty && playerId == null) {
-      // Opcional: retornar false ou permitir ponto sem jogador?
-      // O requisito diz "permitindo que seja indicado", vou assumir que é obrigatório para manter consistência
+    if (type != PointType.opponentError &&
+        team.players.isNotEmpty &&
+        playerId == null) {
       return false;
     }
 

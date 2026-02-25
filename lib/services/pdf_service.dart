@@ -49,12 +49,9 @@ class PdfService {
           _buildChart(stats1, stats2),
           pw.SizedBox(height: 20),
           _buildLegend(team1.name, team2.name),
-          // Página nova para estatísticas de jogadores
           if (team1.players.isNotEmpty || team2.players.isNotEmpty) ...[
             pw.NewPage(),
             _buildPlayerStatsTable([setData], team1, team2),
-            pw.SizedBox(height: 30),
-            _buildPlayerErrorsTable([setData], team1, team2),
           ],
           pw.SizedBox(height: 30),
           _buildPointDetailsTable([setData], team1.name, team2.name),
@@ -106,12 +103,9 @@ class PdfService {
           _buildLegend(team1.name, team2.name),
           pw.SizedBox(height: 40),
           _buildSetsBreakdown(sets, team1.name, team2.name),
-          // Página nova para estatísticas de jogadores
           if (team1.players.isNotEmpty || team2.players.isNotEmpty) ...[
             pw.NewPage(),
             _buildPlayerStatsTable(sets, team1, team2),
-            pw.SizedBox(height: 30),
-            _buildPlayerErrorsTable(sets, team1, team2),
           ],
           pw.SizedBox(height: 30),
           _buildPointDetailsTable(sets, team1.name, team2.name),

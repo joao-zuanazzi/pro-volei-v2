@@ -56,7 +56,8 @@ class TeamPanel extends StatelessWidget {
             const SizedBox(height: 16),
             _buildDetailSelector(),
           ],
-          if (selectedType != null) ...[
+          if (selectedType != null &&
+              selectedType != PointType.opponentError) ...[
             const SizedBox(height: 16),
             _buildPlayerSelector(),
           ],
@@ -340,10 +341,11 @@ class TeamPanel extends StatelessWidget {
         ? opponentPlayers
         : players;
 
+    final isOpponentError = selectedType == PointType.opponentError;
     final canSave =
         selectedType != null &&
         selectedDetail != null &&
-        (targetPlayers.isEmpty || selectedPlayerId != null);
+        (isOpponentError || targetPlayers.isEmpty || selectedPlayerId != null);
 
     return Row(
       children: [
