@@ -31,4 +31,22 @@ class Point {
       timestamp: timestamp,
     );
   }
+
+  /// Serializa para JSON
+  Map<String, dynamic> toJson() => {
+    'teamIndex': teamIndex,
+    'type': type.name,
+    'detail': detail.name,
+    'playerId': playerId,
+    'timestamp': timestamp.toIso8601String(),
+  };
+
+  /// Desserializa de JSON
+  factory Point.fromJson(Map<String, dynamic> json) => Point(
+    teamIndex: json['teamIndex'] as int,
+    type: PointType.values.byName(json['type'] as String),
+    detail: PointDetail.values.byName(json['detail'] as String),
+    playerId: json['playerId'] as String?,
+    timestamp: DateTime.parse(json['timestamp'] as String),
+  );
 }

@@ -477,7 +477,7 @@ class MatchScreen extends StatelessWidget {
   void _showExitDialog(BuildContext context) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         backgroundColor: AppTheme.cardBackground,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: const Text(
@@ -485,21 +485,36 @@ class MatchScreen extends StatelessWidget {
           style: TextStyle(color: Colors.white),
         ),
         content: const Text(
-          'Os dados da partida atual serão perdidos.',
+          'Você pode salvar o progresso e voltar depois.',
           style: TextStyle(color: Colors.white70),
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.pop(dialogContext),
             child: const Text('CANCELAR'),
           ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              Navigator.pop(context);
+          TextButton(
+            onPressed: () async {
+              await GameService.clearSavedMatch();
+              if (context.mounted) {
+                Navigator.pop(dialogContext);
+                Navigator.pop(context);
+              }
             },
-            style: ElevatedButton.styleFrom(backgroundColor: AppTheme.error),
-            child: const Text('SAIR'),
+            style: TextButton.styleFrom(foregroundColor: AppTheme.error),
+            child: const Text('SAIR SEM SALVAR'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              final game = context.read<GameService>();
+              await game.saveMatchState();
+              if (context.mounted) {
+                Navigator.pop(dialogContext);
+                Navigator.pop(context);
+              }
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: AppTheme.success),
+            child: const Text('VOLTAR DEPOIS'),
           ),
         ],
       ),
@@ -599,6 +614,8 @@ class MatchScreen extends StatelessWidget {
     if (file != null) {
       // Salva no storage de relatórios (e finaliza a partida)
       await ReportStorageService.addFinalReport(game.matchName, file.path);
+      // Limpa estado salvo (partida finalizada normalmente)
+      await GameService.clearSavedMatch();
       // Mostra diálogo de confirmação
       final shouldOpen = await showDialog<bool>(
         context: context,

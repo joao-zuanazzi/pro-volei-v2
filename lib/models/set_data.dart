@@ -91,4 +91,26 @@ class SetData {
       duration: duration,
     );
   }
+
+  /// Serializa para JSON
+  Map<String, dynamic> toJson() => {
+    'setNumber': setNumber,
+    'points': points.map((p) => p.toJson()).toList(),
+    'isFinished': isFinished,
+    'winnerTeamIndex': winnerTeamIndex,
+    'durationMs': duration?.inMilliseconds,
+  };
+
+  /// Desserializa de JSON
+  factory SetData.fromJson(Map<String, dynamic> json) => SetData(
+    setNumber: json['setNumber'] as int,
+    points: (json['points'] as List)
+        .map((p) => Point.fromJson(p as Map<String, dynamic>))
+        .toList(),
+    isFinished: json['isFinished'] as bool,
+    winnerTeamIndex: json['winnerTeamIndex'] as int?,
+    duration: json['durationMs'] != null
+        ? Duration(milliseconds: json['durationMs'] as int)
+        : null,
+  );
 }

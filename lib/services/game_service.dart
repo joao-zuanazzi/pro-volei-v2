@@ -1,4 +1,6 @@
+import 'dart:convert';
 import 'package:flutter/foundation.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../models/point.dart';
 import '../models/point_type.dart';
 import '../models/set_data.dart';
@@ -321,6 +323,13 @@ class GameService extends ChangeNotifier {
   void resetGame() {
     _sets = [const SetData(setNumber: 1)];
     _currentSetIndex = 0;
+    _matchName = '';
+    _isTimerRunning = false;
+    _lastResumeTime = null;
+    _accumulatedMatchTime = Duration.zero;
+    _accumulatedSetTime = Duration.zero;
+    _team1 = Team.team1Default;
+    _team2 = Team.team2Default;
     _clearAllSelections();
     notifyListeners();
   }
@@ -378,5 +387,80 @@ class GameService extends ChangeNotifier {
     }
 
     notifyListeners();
+  }
+
+  // =============================================
+  // Persistência do estado da partida
+  // =============================================
+
+  static const String _savedMatchKey = 'saved_match_state';
+
+  /// Verifica se existe uma partida salva
+  static Future<bool> hasSavedMatch() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.containsKey(_savedMatchKey);
+  }
+
+  /// Salva o estado atual da partida
+  Future<void> saveMatchState() async {
+    // Pausa o timer antes de salvar
+    if (_isTimerRunning) {
+      pauseTimer();
+    }
+
+    final state = {
+      'team1': _team1.toJson(),
+      'team2': _team2.toJson(),
+      'sets': _sets.map((s) => s.toJson()).toList(),
+      'currentSetIndex': _currentSetIndex,
+      'matchName': matchName,
+      'accumulatedMatchTimeMs': _accumulatedMatchTime.inMilliseconds,
+      'accumulatedSetTimeMs': _accumulatedSetTime.inMilliseconds,
+    };
+
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_savedMatchKey, jsonEncode(state));
+  }
+
+  /// Restaura o estado de uma partida salva
+  /// Retorna true se havia estado salvo e foi restaurado com sucesso
+  Future<bool> loadMatchState() async {
+    final prefs = await SharedPreferences.getInstance();
+    final jsonStr = prefs.getString(_savedMatchKey);
+    if (jsonStr == null) return false;
+
+    try {
+      final state = jsonDecode(jsonStr) as Map<String, dynamic>;
+
+      _team1 = Team.fromJson(state['team1'] as Map<String, dynamic>);
+      _team2 = Team.fromJson(state['team2'] as Map<String, dynamic>);
+      _sets = (state['sets'] as List)
+          .map((s) => SetData.fromJson(s as Map<String, dynamic>))
+          .toList();
+      _currentSetIndex = state['currentSetIndex'] as int;
+      _matchName = state['matchName'] as String;
+      _accumulatedMatchTime = Duration(
+        milliseconds: state['accumulatedMatchTimeMs'] as int,
+      );
+      _accumulatedSetTime = Duration(
+        milliseconds: state['accumulatedSetTimeMs'] as int,
+      );
+      _isTimerRunning = false;
+      _lastResumeTime = null;
+      _clearAllSelections();
+
+      notifyListeners();
+      return true;
+    } catch (e) {
+      // Se houver erro na deserialização, limpa o estado corrompido
+      await clearSavedMatch();
+      return false;
+    }
+  }
+
+  /// Limpa o estado salvo
+  static Future<void> clearSavedMatch() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_savedMatchKey);
   }
 }

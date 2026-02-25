@@ -204,11 +204,70 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  void _showMatchSetup(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => const MatchSetupDialog(),
-    );
+  void _showMatchSetup(BuildContext context) async {
+    final hasSaved = await GameService.hasSavedMatch();
+
+    if (hasSaved && context.mounted) {
+      // Há partida salva — perguntar se quer retomar
+      showDialog(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+          backgroundColor: AppTheme.cardBackground,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          title: const Text(
+            'Partida em Andamento',
+            style: TextStyle(color: Colors.white),
+          ),
+          content: const Text(
+            'Existe uma partida salva que não foi finalizada. Deseja retomar ou iniciar uma nova?',
+            style: TextStyle(color: Colors.white70),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: const Text('CANCELAR'),
+            ),
+            TextButton(
+              onPressed: () async {
+                await GameService.clearSavedMatch();
+                if (context.mounted) {
+                  Navigator.pop(dialogContext);
+                  showDialog(
+                    context: context,
+                    builder: (context) => const MatchSetupDialog(),
+                  );
+                }
+              },
+              style: TextButton.styleFrom(foregroundColor: Colors.amber),
+              child: const Text('NOVA PARTIDA'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                final game = context.read<GameService>();
+                await game.loadMatchState();
+                if (context.mounted) {
+                  Navigator.pop(dialogContext);
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => const MatchScreen(),
+                    ),
+                  );
+                }
+              },
+              child: const Text('RETOMAR PARTIDA'),
+            ),
+          ],
+        ),
+      );
+    } else if (context.mounted) {
+      // Sem partida salva — abrir configuração normal
+      showDialog(
+        context: context,
+        builder: (context) => const MatchSetupDialog(),
+      );
+    }
   }
 }
 

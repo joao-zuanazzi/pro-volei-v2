@@ -50,6 +50,26 @@ class Team {
       players: players ?? this.players,
     );
   }
+
+  /// Serializa para JSON
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'name': name,
+    'primaryColor': primaryColor.value,
+    'secondaryColor': secondaryColor.value,
+    'players': players.map((p) => p.toMap()).toList(),
+  };
+
+  /// Desserializa de JSON
+  factory Team.fromJson(Map<String, dynamic> json) => Team(
+    id: json['id'] as String,
+    name: json['name'] as String,
+    primaryColor: Color(json['primaryColor'] as int),
+    secondaryColor: Color(json['secondaryColor'] as int),
+    players: (json['players'] as List)
+        .map((p) => Player.fromMap(p as Map<String, dynamic>))
+        .toList(),
+  );
 }
 
 /// Adaptador Hive para Team
