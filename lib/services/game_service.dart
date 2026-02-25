@@ -27,19 +27,73 @@ class GameService extends ChangeNotifier {
   // Nome da partida (para organização de relatórios)
   String _matchName = '';
 
-  // Cronômetro
-  DateTime _matchStartTime = DateTime.now();
-  DateTime _setStartTime = DateTime.now();
+  // Cronômetro com iniciar/pausar
+  bool _isTimerRunning = false;
+  DateTime? _lastResumeTime;
+  Duration _accumulatedMatchTime = Duration.zero;
+  Duration _accumulatedSetTime = Duration.zero;
 
-  /// Tempo decorrido da partida
-  Duration get matchDuration => DateTime.now().difference(_matchStartTime);
+  /// Se o cronômetro está rodando
+  bool get isTimerRunning => _isTimerRunning;
+
+  /// Tempo decorrido da partida (acumulado + tempo desde último resume)
+  Duration get matchDuration {
+    if (_isTimerRunning && _lastResumeTime != null) {
+      return _accumulatedMatchTime +
+          DateTime.now().difference(_lastResumeTime!);
+    }
+    return _accumulatedMatchTime;
+  }
 
   /// Tempo decorrido do set atual
-  Duration get setDuration => DateTime.now().difference(_setStartTime);
+  Duration get setDuration {
+    if (_isTimerRunning && _lastResumeTime != null) {
+      return _accumulatedSetTime + DateTime.now().difference(_lastResumeTime!);
+    }
+    return _accumulatedSetTime;
+  }
 
-  /// Reseta o cronômetro do set
+  /// Inicia ou retoma o cronômetro
+  void startTimer() {
+    if (!_isTimerRunning) {
+      _isTimerRunning = true;
+      _lastResumeTime = DateTime.now();
+      notifyListeners();
+    }
+  }
+
+  /// Pausa o cronômetro
+  void pauseTimer() {
+    if (_isTimerRunning && _lastResumeTime != null) {
+      final elapsed = DateTime.now().difference(_lastResumeTime!);
+      _accumulatedMatchTime += elapsed;
+      _accumulatedSetTime += elapsed;
+      _isTimerRunning = false;
+      _lastResumeTime = null;
+      notifyListeners();
+    }
+  }
+
+  /// Alterna entre iniciar e pausar
+  void toggleTimer() {
+    if (_isTimerRunning) {
+      pauseTimer();
+    } else {
+      startTimer();
+    }
+  }
+
+  /// Reseta o cronômetro do set (mantém o da partida)
   void resetSetTimer() {
-    _setStartTime = DateTime.now();
+    if (_isTimerRunning && _lastResumeTime != null) {
+      // Salva o tempo acumulado da partida antes de resetar o set
+      final elapsed = DateTime.now().difference(_lastResumeTime!);
+      _accumulatedMatchTime += elapsed;
+      _accumulatedSetTime = Duration.zero;
+      _lastResumeTime = DateTime.now();
+    } else {
+      _accumulatedSetTime = Duration.zero;
+    }
   }
 
   /// Inicializa nome padrão da partida baseado na data

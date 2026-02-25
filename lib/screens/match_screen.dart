@@ -114,8 +114,9 @@ class MatchScreen extends StatelessWidget {
               ),
             ),
           ),
-          // Timer à direita - Long press gera pontos aleatórios para teste
+          // Timer à direita - Toque para iniciar/pausar, long press gera pontos de teste
           GestureDetector(
+            onTap: () => context.read<GameService>().toggleTimer(),
             onLongPress: () {
               context.read<GameService>().generateRandomPoints(count: 15);
               ScaffoldMessenger.of(context).showSnackBar(
@@ -130,30 +131,40 @@ class MatchScreen extends StatelessWidget {
               builder: (context, _) {
                 final game = context.read<GameService>();
                 final matchTime = game.matchDuration;
+                final isRunning = game.isTimerRunning;
                 final m = matchTime.inMinutes.toString().padLeft(2, '0');
                 final s = (matchTime.inSeconds % 60).toString().padLeft(2, '0');
-                return Container(
+                return AnimatedContainer(
+                  duration: const Duration(milliseconds: 300),
                   padding: const EdgeInsets.symmetric(
                     horizontal: 12,
                     vertical: 6,
                   ),
                   decoration: BoxDecoration(
-                    color: AppTheme.surfaceLight,
+                    color: isRunning
+                        ? Colors.green.withValues(alpha: 0.2)
+                        : AppTheme.surfaceLight,
                     borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: isRunning
+                          ? Colors.green.withValues(alpha: 0.5)
+                          : Colors.amber.withValues(alpha: 0.3),
+                      width: 1,
+                    ),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(
-                        Icons.timer_outlined,
-                        color: Colors.white54,
+                      Icon(
+                        isRunning ? Icons.pause : Icons.play_arrow,
+                        color: isRunning ? Colors.greenAccent : Colors.amber,
                         size: 16,
                       ),
                       const SizedBox(width: 6),
                       Text(
                         '$m:$s',
-                        style: const TextStyle(
-                          color: Colors.white70,
+                        style: TextStyle(
+                          color: isRunning ? Colors.greenAccent : Colors.amber,
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
                         ),
