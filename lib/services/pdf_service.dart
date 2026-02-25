@@ -165,7 +165,7 @@ class PdfService {
       crossAxisAlignment: pw.CrossAxisAlignment.start,
       children: [
         pw.Text(
-          'ESTATÍSTICAS INDIVIDUAIS',
+          'ESTATÍSTICA POR ATLETA',
           style: pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold),
         ),
         pw.SizedBox(height: 10),
@@ -764,7 +764,7 @@ class PdfService {
       crossAxisAlignment: pw.CrossAxisAlignment.start,
       children: [
         pw.Text(
-          'DETALHAMENTO DOS PONTOS',
+          'ESTATÍSTICA POR EQUIPE',
           style: pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold),
         ),
         pw.SizedBox(height: 10),
