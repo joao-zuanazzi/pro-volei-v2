@@ -20,15 +20,7 @@ enum PointType {
       case PointType.attack:
         return [PointDetail.sideOut, PointDetail.counterAttack];
       case PointType.opponentError:
-        return [
-          PointDetail.serveError,
-          PointDetail.receptionError,
-          PointDetail.settingError,
-          PointDetail.attackError,
-          PointDetail.blockNetTouch,
-          PointDetail.defenseError,
-          PointDetail.otherError,
-        ];
+        return [PointDetail.serveError, PointDetail.otherError];
     }
   }
 }
