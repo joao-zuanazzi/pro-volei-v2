@@ -196,7 +196,7 @@ class HomeScreen extends StatelessWidget {
 
   Widget _buildVersion() {
     return Text(
-      'Versão 2.2',
+      'Versão 2.3',
       style: TextStyle(
         fontSize: 12,
         color: Colors.white.withValues(alpha: 0.3),
