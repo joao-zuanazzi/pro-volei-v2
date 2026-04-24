@@ -124,7 +124,33 @@ class TeamListScreen extends StatelessWidget {
                         '${team.players.length} atletas',
                         style: const TextStyle(color: Colors.white70),
                       ),
-                      trailing: const Icon(Icons.edit, color: Colors.white54),
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.delete_outline, color: Colors.red, size: 20),
+                            onPressed: () async {
+                              final confirm = await showDialog<bool>(
+                                context: context,
+                                builder: (ctx) => AlertDialog(
+                                  backgroundColor: AppTheme.cardBackground,
+                                  title: const Text('Excluir equipe?', style: TextStyle(color: Colors.white)),
+                                  content: Text('Deseja excluir ${team.name}?', style: const TextStyle(color: Colors.white70)),
+                                  actions: [
+                                    TextButton(child: const Text('CANCELAR'), onPressed: () => Navigator.pop(ctx, false)),
+                                    TextButton(
+                                      child: const Text('EXCLUIR', style: TextStyle(color: AppTheme.error)),
+                                      onPressed: () => Navigator.pop(ctx, true),
+                                    ),
+                                  ],
+                                ),
+                              );
+                              if (confirm == true) storage.deleteTeam(team.id);
+                            },
+                          ),
+                          const Icon(Icons.edit, color: Colors.white54),
+                        ],
+                      ),
                       onTap: () => _openEditor(context, team: team),
                     ),
                   ),

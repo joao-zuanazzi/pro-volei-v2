@@ -94,7 +94,7 @@ class TeamPanel extends StatelessWidget {
 
   Widget _buildHeader() {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      height: 8,
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
@@ -103,39 +103,6 @@ class TeamPanel extends StatelessWidget {
           ],
         ),
         borderRadius: const BorderRadius.vertical(top: Radius.circular(19)),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Expanded(
-            child: GestureDetector(
-              onTap: onEditName,
-              child: Row(
-                children: [
-                  Flexible(
-                    child: Text(
-                      teamName,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                  if (onEditName != null) ...[
-                    const SizedBox(width: 8),
-                    Icon(
-                      Icons.edit,
-                      color: Colors.white.withValues(alpha: 0.7),
-                      size: 16,
-                    ),
-                  ],
-                ],
-              ),
-            ),
-          ),
-        ],
       ),
     );
   }
@@ -250,6 +217,10 @@ class TeamPanel extends StatelessWidget {
 
     if (targetPlayers.isEmpty) return const SizedBox();
 
+    // Ordena por número da camisa
+    final sortedPlayers = List.of(targetPlayers)
+      ..sort((a, b) => a.number.compareTo(b.number));
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -262,7 +233,7 @@ class TeamPanel extends StatelessWidget {
         Wrap(
           spacing: 8,
           runSpacing: 8,
-          children: targetPlayers.map((player) {
+          children: sortedPlayers.map((player) {
             final isSelected = selectedPlayerId == player.id;
             return GestureDetector(
               onTap: () => onPlayerChanged(isSelected ? null : player.id),

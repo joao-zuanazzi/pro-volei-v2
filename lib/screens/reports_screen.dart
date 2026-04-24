@@ -118,7 +118,43 @@ class _ReportsScreenState extends State<ReportsScreen> {
         itemCount: _reports.length,
         itemBuilder: (context, index) {
           final report = _reports[index];
-          return _buildReportCard(report);
+          return Dismissible(
+            key: Key(report.id),
+            direction: DismissDirection.endToStart,
+            background: Container(
+              alignment: Alignment.centerRight,
+              padding: const EdgeInsets.only(right: 20),
+              margin: const EdgeInsets.only(bottom: 12),
+              decoration: BoxDecoration(
+                color: AppTheme.error,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: const Icon(Icons.delete, color: Colors.white),
+            ),
+            confirmDismiss: (_) async {
+              return await showDialog<bool>(
+                context: context,
+                builder: (ctx) => AlertDialog(
+                  backgroundColor: AppTheme.cardBackground,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                  title: const Text('Excluir Relatório?', style: TextStyle(color: Colors.white)),
+                  content: Text('Deseja excluir "${report.name}"?', style: const TextStyle(color: Colors.white70)),
+                  actions: [
+                    TextButton(child: const Text('CANCELAR'), onPressed: () => Navigator.pop(ctx, false)),
+                    TextButton(
+                      child: const Text('EXCLUIR', style: TextStyle(color: AppTheme.error)),
+                      onPressed: () => Navigator.pop(ctx, true),
+                    ),
+                  ],
+                ),
+              );
+            },
+            onDismissed: (_) async {
+              await ReportStorageService.deleteMatch(report.id);
+              _loadReports();
+            },
+            child: _buildReportCard(report),
+          );
         },
       ),
     );
