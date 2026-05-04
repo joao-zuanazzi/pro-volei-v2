@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:share_plus/share_plus.dart';
 import '../models/match_report.dart';
 import '../services/pdf_service.dart';
 import '../services/report_storage_service.dart';
@@ -140,7 +141,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
                   title: const Text('Excluir Relatório?', style: TextStyle(color: Colors.white)),
                   content: Text('Deseja excluir "${report.name}"?', style: const TextStyle(color: Colors.white70)),
                   actions: [
-                    TextButton(child: const Text('CANCELAR'), onPressed: () => Navigator.pop(ctx, false)),
+                    TextButton(child: const Text('CANCELAR', style: TextStyle(color: Colors.white70)), onPressed: () => Navigator.pop(ctx, false)),
                     TextButton(
                       child: const Text('EXCLUIR', style: TextStyle(color: AppTheme.error)),
                       onPressed: () => Navigator.pop(ctx, true),
@@ -339,10 +340,19 @@ class _ReportsScreenState extends State<ReportsScreen> {
             fontWeight: isHighlighted ? FontWeight.w600 : FontWeight.normal,
           ),
         ),
-        trailing: const Icon(
-          Icons.open_in_new,
-          color: Colors.white38,
-          size: 20,
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            IconButton(
+              icon: const Icon(Icons.share, color: Colors.white38, size: 20),
+              onPressed: () => _sharePdf(path),
+            ),
+            const Icon(
+              Icons.open_in_new,
+              color: Colors.white38,
+              size: 20,
+            ),
+          ],
         ),
         onTap: () => _openPdf(path),
       ),
@@ -368,6 +378,28 @@ class _ReportsScreenState extends State<ReportsScreen> {
     await PdfService.openPdf(File(path));
   }
 
+  Future<void> _sharePdf(String path) async {
+    final exists = await ReportStorageService.fileExists(path);
+    if (!exists) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Arquivo não encontrado'),
+          backgroundColor: AppTheme.error,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+        ),
+      );
+      return;
+    }
+
+    await Share.shareXFiles(
+      [XFile(path)],
+      subject: 'Relatório ProVolei',
+    );
+  }
+
   void _confirmDelete(MatchReport report) {
     Navigator.pop(context); // Fecha o bottom sheet
     showDialog(
@@ -386,7 +418,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('CANCELAR'),
+            child: const Text('CANCELAR', style: TextStyle(color: Colors.white70)),
           ),
           ElevatedButton(
             onPressed: () async {

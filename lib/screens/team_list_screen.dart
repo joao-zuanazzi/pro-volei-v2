@@ -62,7 +62,11 @@ class TeamListScreen extends StatelessWidget {
                   background: Container(
                     alignment: Alignment.centerRight,
                     padding: const EdgeInsets.only(right: 20),
-                    color: AppTheme.error,
+                    margin: const EdgeInsets.only(bottom: 12),
+                    decoration: BoxDecoration(
+                      color: AppTheme.error,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                     child: const Icon(Icons.delete, color: Colors.white),
                   ),
                   confirmDismiss: (direction) async {
@@ -70,17 +74,16 @@ class TeamListScreen extends StatelessWidget {
                       context: context,
                       builder: (ctx) => AlertDialog(
                         backgroundColor: AppTheme.cardBackground,
-                        title: const Text(
-                          'Excluir equipe?',
-                          style: TextStyle(color: Colors.white),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                        title: Text(
+                          'Deseja excluir a equipe ${team.name}?',
+                          style: const TextStyle(color: Colors.white, fontSize: 16),
+                          textAlign: TextAlign.center,
                         ),
-                        content: Text(
-                          'Deseja excluir ${team.name}?',
-                          style: const TextStyle(color: Colors.white70),
-                        ),
+                        actionsAlignment: MainAxisAlignment.center,
                         actions: [
                           TextButton(
-                            child: const Text('CANCELAR'),
+                            child: const Text('CANCELAR', style: TextStyle(color: Colors.white70)),
                             onPressed: () => Navigator.pop(ctx, false),
                           ),
                           TextButton(
@@ -134,10 +137,11 @@ class TeamListScreen extends StatelessWidget {
                                 context: context,
                                 builder: (ctx) => AlertDialog(
                                   backgroundColor: AppTheme.cardBackground,
-                                  title: const Text('Excluir equipe?', style: TextStyle(color: Colors.white)),
-                                  content: Text('Deseja excluir ${team.name}?', style: const TextStyle(color: Colors.white70)),
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                                  title: Text('Deseja excluir a equipe ${team.name}?', style: const TextStyle(color: Colors.white, fontSize: 16), textAlign: TextAlign.center),
+                                  actionsAlignment: MainAxisAlignment.center,
                                   actions: [
-                                    TextButton(child: const Text('CANCELAR'), onPressed: () => Navigator.pop(ctx, false)),
+                                    TextButton(child: const Text('CANCELAR', style: TextStyle(color: Colors.white70)), onPressed: () => Navigator.pop(ctx, false)),
                                     TextButton(
                                       child: const Text('EXCLUIR', style: TextStyle(color: AppTheme.error)),
                                       onPressed: () => Navigator.pop(ctx, true),

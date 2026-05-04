@@ -20,6 +20,7 @@ class _TeamEditorScreenState extends State<TeamEditorScreen> {
   late Color _primaryColor;
   late Color _secondaryColor;
   late List<Player> _players;
+  bool _hasChanges = false;
 
   @override
   void initState() {
@@ -29,6 +30,7 @@ class _TeamEditorScreenState extends State<TeamEditorScreen> {
     _primaryColor = team?.primaryColor ?? Team.team1Default.primaryColor;
     _secondaryColor = team?.secondaryColor ?? Team.team1Default.secondaryColor;
     _players = List.from(team?.players ?? []);
+    _nameController.addListener(() => _hasChanges = true);
   }
 
   @override
@@ -80,6 +82,7 @@ class _TeamEditorScreenState extends State<TeamEditorScreen> {
           }
           setState(() {
             _players.add(Player.create(name: name, number: number));
+            _hasChanges = true;
           });
           Navigator.pop(context);
         },
@@ -117,6 +120,7 @@ class _TeamEditorScreenState extends State<TeamEditorScreen> {
           }
           setState(() {
             _players[index] = player.copyWith(name: name, number: number);
+            _hasChanges = true;
           });
           Navigator.pop(context);
         },
@@ -127,12 +131,51 @@ class _TeamEditorScreenState extends State<TeamEditorScreen> {
   void _removePlayer(int index) {
     setState(() {
       _players.removeAt(index);
+      _hasChanges = true;
     });
+  }
+
+  Future<bool> _onWillPop() async {
+    if (!_hasChanges) return true;
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppTheme.cardBackground,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Text(
+          'Salvar alterações?',
+          style: TextStyle(color: Colors.white, fontSize: 16),
+          textAlign: TextAlign.center,
+        ),
+        actionsAlignment: MainAxisAlignment.center,
+        actions: [
+          TextButton(
+            child: const Text('DESCARTAR', style: TextStyle(color: AppTheme.error)),
+            onPressed: () => Navigator.pop(ctx, true),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: AppTheme.success),
+            child: const Text('SALVAR'),
+            onPressed: () {
+              _save();
+            },
+          ),
+        ],
+      ),
+    );
+    return result ?? false;
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) async {
+        if (didPop) return;
+        final shouldPop = await _onWillPop();
+        if (shouldPop && context.mounted) Navigator.pop(context);
+      },
+      child: Scaffold(
       appBar: AppBar(
         title: Text(widget.team == null ? 'Nova Equipe' : 'Editar Equipe'),
         backgroundColor: AppTheme.darkGradient.colors.first,
@@ -226,6 +269,7 @@ class _TeamEditorScreenState extends State<TeamEditorScreen> {
           ],
         ),
       ),
+      ),
     );
   }
 
@@ -306,7 +350,7 @@ class _PlayerDialogState extends State<_PlayerDialog> {
       ),
       actions: [
         TextButton(
-          child: const Text('CANCELAR'),
+          child: const Text('CANCELAR', style: TextStyle(color: Colors.white70)),
           onPressed: () => Navigator.pop(context),
         ),
         ElevatedButton(

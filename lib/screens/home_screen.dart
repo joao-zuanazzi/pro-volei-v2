@@ -186,10 +186,10 @@ class HomeScreen extends StatelessWidget {
           MaterialPageRoute(builder: (context) => const ReportsScreen()),
         );
       },
-      icon: const Icon(Icons.folder_open, color: Colors.white54),
+      icon: const Icon(Icons.folder_open, color: Colors.white70),
       label: const Text(
         'VER RELATÓRIOS',
-        style: TextStyle(color: Colors.white54, fontSize: 14),
+        style: TextStyle(color: Colors.white70, fontSize: 16),
       ),
     );
   }
@@ -227,7 +227,7 @@ class HomeScreen extends StatelessWidget {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(dialogContext),
-              child: const Text('CANCELAR'),
+              child: const Text('CANCELAR', style: TextStyle(color: Colors.white70)),
             ),
             TextButton(
               onPressed: () async {
@@ -314,7 +314,7 @@ class _MatchSetupDialogState extends State<MatchSetupDialog> {
       ),
       actions: [
         TextButton(
-          child: const Text('CANCELAR'),
+          child: const Text('CANCELAR', style: TextStyle(color: Colors.white70)),
           onPressed: () => Navigator.pop(context),
         ),
         ElevatedButton(
@@ -332,7 +332,17 @@ class _MatchSetupDialogState extends State<MatchSetupDialog> {
 
             if (_team2Id != null) {
               final t2 = storage.getTeam(_team2Id!);
-              if (t2 != null) game.setTeam(1, t2);
+              if (t2 != null) {
+                // Se ambas as equipes têm a mesma cor, usa cor padrão da equipe 2
+                if (t2.primaryColor.value == game.team1.primaryColor.value) {
+                  game.setTeam(1, t2.copyWith(
+                    primaryColor: Team.team2Default.primaryColor,
+                    secondaryColor: Team.team2Default.secondaryColor,
+                  ));
+                } else {
+                  game.setTeam(1, t2);
+                }
+              }
             }
 
             Navigator.pop(context); // Close dialog

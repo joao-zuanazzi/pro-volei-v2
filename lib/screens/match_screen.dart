@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:share_plus/share_plus.dart';
 import '../services/game_service.dart';
 import '../services/pdf_service.dart';
 import '../services/report_storage_service.dart';
@@ -33,13 +34,16 @@ class MatchScreen extends StatelessWidget {
                   ],
                 );
               }
-              // Se a altura for pequena, usa scroll
+              // Se a altura for pequena (paisagem), usa scroll compacto
               return SingleChildScrollView(
                 child: Column(
                   children: [
                     _buildHeader(context),
-                    _buildScoreDisplay(context),
-                    SizedBox(height: 400, child: _buildTeamPanels(context)),
+                    _buildScoreDisplay(context, compact: true),
+                    SizedBox(
+                      height: constraints.maxHeight * 0.55,
+                      child: _buildTeamPanels(context),
+                    ),
                     _buildSetSelector(context),
                     _buildActionButtons(context),
                   ],
@@ -180,16 +184,21 @@ class MatchScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildScoreDisplay(BuildContext context) {
+  Widget _buildScoreDisplay(BuildContext context, {bool compact = false}) {
     return Consumer<GameService>(
       builder: (context, game, _) {
         return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          padding: EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: compact ? 4 : 12,
+          ),
           child: ScoreDisplay(
             score1: game.getScore(0),
             score2: game.getScore(1),
             team1Name: game.team1.name,
             team2Name: game.team2.name,
+            team1Color: game.team1.primaryColor,
+            team2Color: game.team2.primaryColor,
             onSwapTeams: () => game.swapTeams(),
           ),
         );
@@ -211,25 +220,75 @@ class MatchScreen extends StatelessWidget {
                 ],
               );
             }
-            // Se tela estreita, usa tabs
+            // Se tela estreita, usa tabs com cores das equipes
             return DefaultTabController(
               length: 2,
               child: Column(
                 children: [
                   Container(
                     margin: const EdgeInsets.symmetric(horizontal: 16),
+                    padding: const EdgeInsets.symmetric(vertical: 4),
                     decoration: BoxDecoration(
                       color: AppTheme.cardBackground,
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: TabBar(
-                      indicatorColor: AppTheme.primaryGold,
+                      indicatorSize: TabBarIndicatorSize.tab,
                       indicatorWeight: 3,
+                      dividerHeight: 0,
                       labelColor: Colors.white,
-                      unselectedLabelColor: Colors.white54,
+                      unselectedLabelColor: Colors.white38,
+                      indicator: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10),
+                        color: Colors.white.withValues(alpha: 0.1),
+                      ),
                       tabs: [
-                        Tab(text: game.team1.name),
-                        Tab(text: game.team2.name),
+                        Tab(
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Container(
+                                width: 12,
+                                height: 12,
+                                decoration: BoxDecoration(
+                                  color: game.team1.primaryColor,
+                                  shape: BoxShape.circle,
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: game.team1.primaryColor.withValues(alpha: 0.5),
+                                      blurRadius: 4,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              const Text('Equipe 1', style: TextStyle(fontSize: 14)),
+                            ],
+                          ),
+                        ),
+                        Tab(
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Container(
+                                width: 12,
+                                height: 12,
+                                decoration: BoxDecoration(
+                                  color: game.team2.primaryColor,
+                                  shape: BoxShape.circle,
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: game.team2.primaryColor.withValues(alpha: 0.5),
+                                      blurRadius: 4,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              const Text('Equipe 2', style: TextStyle(fontSize: 14)),
+                            ],
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -413,7 +472,7 @@ class MatchScreen extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('CANCELAR'),
+            child: const Text('CANCELAR', style: TextStyle(color: Colors.white70)),
           ),
           ElevatedButton(
             onPressed: () {
@@ -460,7 +519,7 @@ class MatchScreen extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('CANCELAR'),
+            child: const Text('CANCELAR', style: TextStyle(color: Colors.white70)),
           ),
           ElevatedButton(
             onPressed: () {
@@ -491,7 +550,7 @@ class MatchScreen extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),
-            child: const Text('CANCELAR'),
+            child: const Text('CANCELAR', style: TextStyle(color: Colors.white70)),
           ),
           TextButton(
             onPressed: () async {
@@ -567,7 +626,21 @@ class MatchScreen extends StatelessWidget {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),
-              child: const Text('FECHAR'),
+              child: const Text('FECHAR', style: TextStyle(color: Colors.white70)),
+            ),
+            ElevatedButton.icon(
+              onPressed: () async {
+                Navigator.pop(context, false);
+                await Share.shareXFiles(
+                  [XFile(file!.path)],
+                  subject: 'Relatório Set ${setData.setNumber}',
+                );
+              },
+              icon: const Icon(Icons.share, size: 18),
+              label: const Text('COMPARTILHAR'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppTheme.success,
+              ),
             ),
             ElevatedButton.icon(
               onPressed: () => Navigator.pop(context, true),
@@ -641,7 +714,21 @@ class MatchScreen extends StatelessWidget {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),
-              child: const Text('FECHAR'),
+              child: const Text('FECHAR', style: TextStyle(color: Colors.white70)),
+            ),
+            ElevatedButton.icon(
+              onPressed: () async {
+                Navigator.pop(context, false);
+                await Share.shareXFiles(
+                  [XFile(file!.path)],
+                  subject: 'Relatório Final - ${game.matchName}',
+                );
+              },
+              icon: const Icon(Icons.share, size: 18),
+              label: const Text('COMPARTILHAR'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppTheme.success,
+              ),
             ),
             ElevatedButton.icon(
               onPressed: () => Navigator.pop(context, true),

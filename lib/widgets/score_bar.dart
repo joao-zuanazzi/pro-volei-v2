@@ -70,6 +70,8 @@ class ScoreDisplay extends StatelessWidget {
   final int score2;
   final String team1Name;
   final String team2Name;
+  final Color team1Color;
+  final Color team2Color;
   final VoidCallback? onSwapTeams;
 
   const ScoreDisplay({
@@ -78,6 +80,8 @@ class ScoreDisplay extends StatelessWidget {
     required this.score2,
     required this.team1Name,
     required this.team2Name,
+    required this.team1Color,
+    required this.team2Color,
     this.onSwapTeams,
   });
 
@@ -100,11 +104,11 @@ class ScoreDisplay extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
           Expanded(
-            child: _buildTeamScore(team1Name, score1, AppTheme.team1Color),
+            child: _buildTeamScore(team1Name, score1, team1Color),
           ),
           _buildVs(),
           Expanded(
-            child: _buildTeamScore(team2Name, score2, AppTheme.team2Color),
+            child: _buildTeamScore(team2Name, score2, team2Color),
           ),
         ],
       ),

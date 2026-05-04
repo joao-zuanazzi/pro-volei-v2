@@ -85,25 +85,9 @@ class TeamPanel extends StatelessWidget {
           ),
         ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [_buildHeader(), content],
-      ),
-    );
-  }
-
-  Widget _buildHeader() {
-    return Container(
-      height: 8,
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            teamColor.withValues(alpha: 0.8),
-            teamColor.withValues(alpha: 0.6),
-          ],
-        ),
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(19)),
-      ),
+      child: isExpanded
+          ? Column(children: [Expanded(child: content)])
+          : content,
     );
   }
 
