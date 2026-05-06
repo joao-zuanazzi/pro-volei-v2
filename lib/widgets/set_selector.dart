@@ -19,10 +19,12 @@ class SetSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = AppTheme.of(context);
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
       decoration: BoxDecoration(
-        color: AppTheme.cardBackground,
+        color: colors.card,
         borderRadius: BorderRadius.circular(16),
       ),
       child: SingleChildScrollView(
@@ -50,7 +52,7 @@ class SetSelector extends StatelessWidget {
                             ? (winner == 0
                                   ? AppTheme.team1Color.withValues(alpha: 0.3)
                                   : AppTheme.team2Color.withValues(alpha: 0.3))
-                            : AppTheme.surfaceLight),
+                            : colors.surface),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
                     color: isSelected
@@ -74,7 +76,7 @@ class SetSelector extends StatelessWidget {
                     Text(
                       'SET',
                       style: TextStyle(
-                        color: isSelected ? Colors.white70 : Colors.white38,
+                        color: isSelected ? Colors.white70 : colors.textHint,
                         fontSize: 8,
                         fontWeight: FontWeight.w500,
                       ),
@@ -82,7 +84,7 @@ class SetSelector extends StatelessWidget {
                     Text(
                       '$setNumber',
                       style: TextStyle(
-                        color: isSelected ? Colors.white : Colors.white70,
+                        color: isSelected ? Colors.white : colors.textSecondary,
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
                       ),

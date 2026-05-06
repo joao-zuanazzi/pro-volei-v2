@@ -35,9 +35,11 @@ class _ReportsScreenState extends State<ReportsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = AppTheme.of(context);
+
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(gradient: AppTheme.darkGradient),
+        decoration: BoxDecoration(gradient: colors.backgroundGradient),
         child: SafeArea(
           child: Column(
             children: [
@@ -51,12 +53,14 @@ class _ReportsScreenState extends State<ReportsScreen> {
   }
 
   Widget _buildHeader() {
+    final colors = AppTheme.of(context);
+
     return Padding(
       padding: const EdgeInsets.all(16),
       child: Row(
         children: [
           IconButton(
-            icon: const Icon(Icons.arrow_back_ios, color: Colors.white70),
+            icon: Icon(Icons.arrow_back_ios, color: colors.textSecondary),
             onPressed: () => Navigator.pop(context),
           ),
           const SizedBox(width: 8),
@@ -75,7 +79,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
           ),
           const Spacer(),
           IconButton(
-            icon: const Icon(Icons.refresh, color: Colors.white70),
+            icon: Icon(Icons.refresh, color: colors.textSecondary),
             onPressed: _loadReports,
           ),
         ],
@@ -84,6 +88,8 @@ class _ReportsScreenState extends State<ReportsScreen> {
   }
 
   Widget _buildContent() {
+    final colors = AppTheme.of(context);
+
     if (_isLoading) {
       return const Center(
         child: CircularProgressIndicator(color: AppTheme.primaryGold),
@@ -95,16 +101,16 @@ class _ReportsScreenState extends State<ReportsScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.folder_open, size: 80, color: Colors.white24),
+            Icon(Icons.folder_open, size: 80, color: colors.textHint),
             const SizedBox(height: 16),
-            const Text(
+            Text(
               'Nenhum relatório salvo',
-              style: TextStyle(color: Colors.white54, fontSize: 18),
+              style: TextStyle(color: colors.textTertiary, fontSize: 18),
             ),
             const SizedBox(height: 8),
-            const Text(
+            Text(
               'Finalize uma partida para ver aqui',
-              style: TextStyle(color: Colors.white38, fontSize: 14),
+              style: TextStyle(color: colors.textHint, fontSize: 14),
             ),
           ],
         ),
@@ -133,22 +139,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
               child: const Icon(Icons.delete, color: Colors.white),
             ),
             confirmDismiss: (_) async {
-              return await showDialog<bool>(
-                context: context,
-                builder: (ctx) => AlertDialog(
-                  backgroundColor: AppTheme.cardBackground,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                  title: const Text('Excluir Relatório?', style: TextStyle(color: Colors.white)),
-                  content: Text('Deseja excluir "${report.name}"?', style: const TextStyle(color: Colors.white70)),
-                  actions: [
-                    TextButton(child: const Text('CANCELAR', style: TextStyle(color: Colors.white70)), onPressed: () => Navigator.pop(ctx, false)),
-                    TextButton(
-                      child: const Text('EXCLUIR', style: TextStyle(color: AppTheme.error)),
-                      onPressed: () => Navigator.pop(ctx, true),
-                    ),
-                  ],
-                ),
-              );
+              return await _showDeleteSwipeDialog(report);
             },
             onDismissed: (_) async {
               await ReportStorageService.deleteMatch(report.id);
@@ -161,13 +152,35 @@ class _ReportsScreenState extends State<ReportsScreen> {
     );
   }
 
+  Future<bool?> _showDeleteSwipeDialog(MatchReport report) {
+    final colors = AppTheme.read(context);
+    return showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: colors.dialogBackground,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Text('Excluir Relatório?', style: TextStyle(color: colors.text)),
+        content: Text('Deseja excluir "${report.name}"?', style: TextStyle(color: colors.textSecondary)),
+        actions: [
+          TextButton(child: Text('CANCELAR', style: TextStyle(color: colors.cancelButton)), onPressed: () => Navigator.pop(ctx, false)),
+          TextButton(
+            child: const Text('EXCLUIR', style: TextStyle(color: AppTheme.error)),
+            onPressed: () => Navigator.pop(ctx, true),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildReportCard(MatchReport report) {
+    final colors = AppTheme.of(context);
+
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: AppTheme.cardBackground,
+        color: colors.card,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white12),
+        border: Border.all(color: colors.border.withValues(alpha: 0.5)),
       ),
       child: Material(
         color: Colors.transparent,
@@ -198,8 +211,8 @@ class _ReportsScreenState extends State<ReportsScreen> {
                     children: [
                       Text(
                         report.name,
-                        style: const TextStyle(
-                          color: Colors.white,
+                        style: TextStyle(
+                          color: colors.text,
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
                         ),
@@ -207,8 +220,8 @@ class _ReportsScreenState extends State<ReportsScreen> {
                       const SizedBox(height: 4),
                       Text(
                         report.formattedDate,
-                        style: const TextStyle(
-                          color: Colors.white54,
+                        style: TextStyle(
+                          color: colors.textTertiary,
                           fontSize: 13,
                         ),
                       ),
@@ -221,16 +234,16 @@ class _ReportsScreenState extends State<ReportsScreen> {
                     vertical: 6,
                   ),
                   decoration: BoxDecoration(
-                    color: AppTheme.surfaceLight,
+                    color: colors.surface,
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
                     '${report.totalReports} PDF${report.totalReports != 1 ? 's' : ''}',
-                    style: const TextStyle(color: Colors.white70, fontSize: 12),
+                    style: TextStyle(color: colors.textSecondary, fontSize: 12),
                   ),
                 ),
                 const SizedBox(width: 8),
-                const Icon(Icons.chevron_right, color: Colors.white38),
+                Icon(Icons.chevron_right, color: colors.textHint),
               ],
             ),
           ),
@@ -240,9 +253,11 @@ class _ReportsScreenState extends State<ReportsScreen> {
   }
 
   void _showReportDetails(MatchReport report) {
+    final colors = AppTheme.read(context);
+
     showModalBottomSheet(
       context: context,
-      backgroundColor: AppTheme.cardBackground,
+      backgroundColor: colors.dialogBackground,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
@@ -251,6 +266,8 @@ class _ReportsScreenState extends State<ReportsScreen> {
   }
 
   Widget _buildReportDetailsSheet(MatchReport report) {
+    final colors = AppTheme.of(context);
+
     return Container(
       padding: const EdgeInsets.all(24),
       child: Column(
@@ -262,8 +279,8 @@ class _ReportsScreenState extends State<ReportsScreen> {
               Expanded(
                 child: Text(
                   report.name,
-                  style: const TextStyle(
-                    color: Colors.white,
+                  style: TextStyle(
+                    color: colors.text,
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
                   ),
@@ -277,13 +294,13 @@ class _ReportsScreenState extends State<ReportsScreen> {
           ),
           Text(
             report.formattedDate,
-            style: const TextStyle(color: Colors.white54),
+            style: TextStyle(color: colors.textTertiary),
           ),
           const SizedBox(height: 24),
-          const Text(
+          Text(
             'Relatórios disponíveis:',
             style: TextStyle(
-              color: Colors.white70,
+              color: colors.textSecondary,
               fontSize: 14,
               fontWeight: FontWeight.w500,
             ),
@@ -317,12 +334,14 @@ class _ReportsScreenState extends State<ReportsScreen> {
     IconData icon, {
     bool isHighlighted = false,
   }) {
+    final colors = AppTheme.of(context);
+
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
         color: isHighlighted
             ? AppTheme.primaryGold.withValues(alpha: 0.1)
-            : AppTheme.surfaceLight,
+            : colors.surface,
         borderRadius: BorderRadius.circular(12),
         border: isHighlighted
             ? Border.all(color: AppTheme.primaryGold.withValues(alpha: 0.3))
@@ -331,12 +350,12 @@ class _ReportsScreenState extends State<ReportsScreen> {
       child: ListTile(
         leading: Icon(
           icon,
-          color: isHighlighted ? AppTheme.primaryGold : Colors.white70,
+          color: isHighlighted ? AppTheme.primaryGold : colors.textSecondary,
         ),
         title: Text(
           title,
           style: TextStyle(
-            color: isHighlighted ? AppTheme.primaryGold : Colors.white,
+            color: isHighlighted ? AppTheme.primaryGold : colors.text,
             fontWeight: isHighlighted ? FontWeight.w600 : FontWeight.normal,
           ),
         ),
@@ -344,12 +363,12 @@ class _ReportsScreenState extends State<ReportsScreen> {
           mainAxisSize: MainAxisSize.min,
           children: [
             IconButton(
-              icon: const Icon(Icons.share, color: Colors.white38, size: 20),
+              icon: Icon(Icons.share, color: colors.textHint, size: 20),
               onPressed: () => _sharePdf(path),
             ),
-            const Icon(
+            Icon(
               Icons.open_in_new,
-              color: Colors.white38,
+              color: colors.textHint,
               size: 20,
             ),
           ],
@@ -401,24 +420,25 @@ class _ReportsScreenState extends State<ReportsScreen> {
   }
 
   void _confirmDelete(MatchReport report) {
+    final colors = AppTheme.read(context);
     Navigator.pop(context); // Fecha o bottom sheet
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: AppTheme.cardBackground,
+        backgroundColor: colors.dialogBackground,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Text(
+        title: Text(
           'Excluir Partida?',
-          style: TextStyle(color: Colors.white),
+          style: TextStyle(color: colors.text),
         ),
         content: Text(
           'Deseja remover "${report.name}" da lista?\n\nOs arquivos PDF não serão apagados.',
-          style: const TextStyle(color: Colors.white70),
+          style: TextStyle(color: colors.textSecondary),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('CANCELAR', style: TextStyle(color: Colors.white70)),
+            child: Text('CANCELAR', style: TextStyle(color: colors.cancelButton)),
           ),
           ElevatedButton(
             onPressed: () async {

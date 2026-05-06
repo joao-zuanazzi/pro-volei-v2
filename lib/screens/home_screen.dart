@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../services/game_service.dart';
 import '../models/team.dart';
 import '../services/storage_service.dart';
+import '../services/theme_provider.dart';
 import '../theme/app_theme.dart';
 import 'match_screen.dart';
 import 'reports_screen.dart';
@@ -14,109 +15,128 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = AppTheme.of(context);
+
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(gradient: AppTheme.darkGradient),
+        decoration: BoxDecoration(gradient: colors.backgroundGradient),
         child: SafeArea(
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              final isLandscape = constraints.maxWidth > constraints.maxHeight;
-              final isDesktop = constraints.maxHeight > 600;
+          child: Stack(
+            children: [
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  final isLandscape = constraints.maxWidth > constraints.maxHeight;
+                  final isDesktop = constraints.maxHeight > 600;
 
-              // PC: 280px, Celular portrait: 300px, Celular landscape: 140px
-              final logoHeight = isDesktop
-                  ? 280.0
-                  : (isLandscape ? 140.0 : 300.0);
+                  // PC: 280px, Celular portrait: 300px, Celular landscape: 140px
+                  final logoHeight = isDesktop
+                      ? 280.0
+                      : (isLandscape ? 140.0 : 300.0);
 
-              // Em landscape usa scroll centrado, em portrait usa layout fixo
-              if (isLandscape) {
-                return Center(
-                  child: SingleChildScrollView(
-                    child: Padding(
-                      padding: const EdgeInsets.all(24),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          _buildLogo(logoHeight),
-                          const SizedBox(height: 12),
-                          _buildSubtitle(),
-                          const SizedBox(height: 20),
-                          _buildStartButton(context),
-                          const SizedBox(height: 12),
-                          _buildManageTeamsButton(context),
-                          const SizedBox(height: 8),
-                          _buildReportsButton(context),
-                          const SizedBox(height: 16),
-                          _buildVersion(),
-                        ],
+                  // Em landscape usa scroll centrado, em portrait usa layout fixo
+                  if (isLandscape) {
+                    return Center(
+                      child: SingleChildScrollView(
+                        child: Padding(
+                          padding: const EdgeInsets.all(24),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              _buildLogo(context, logoHeight),
+                              const SizedBox(height: 12),
+                              _buildSubtitle(context),
+                              const SizedBox(height: 20),
+                              _buildStartButton(context),
+                              const SizedBox(height: 12),
+                              _buildManageTeamsButton(context),
+                              const SizedBox(height: 8),
+                              _buildReportsButton(context),
+                              const SizedBox(height: 16),
+                              _buildVersion(context),
+                            ],
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
-                );
-              }
+                    );
+                  }
 
-              // Portrait: layout original com Spacers
-              return Padding(
-                padding: const EdgeInsets.all(32),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Spacer(),
-                    _buildLogo(logoHeight),
-                    const SizedBox(height: 16),
-                    _buildSubtitle(),
-                    const Spacer(),
-                    const Spacer(),
-                    _buildStartButton(context),
-                    const SizedBox(height: 24),
-                    _buildManageTeamsButton(context),
-                    const SizedBox(height: 12),
-                    _buildReportsButton(context),
-                    const SizedBox(height: 32),
-                    _buildVersion(),
-                  ],
-                ),
-              );
-            },
+                  // Portrait: layout original com Spacers
+                  return Padding(
+                    padding: const EdgeInsets.all(32),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Spacer(),
+                        _buildLogo(context, logoHeight),
+                        const SizedBox(height: 16),
+                        _buildSubtitle(context),
+                        const Spacer(),
+                        const Spacer(),
+                        _buildStartButton(context),
+                        const SizedBox(height: 24),
+                        _buildManageTeamsButton(context),
+                        const SizedBox(height: 12),
+                        _buildReportsButton(context),
+                        const SizedBox(height: 32),
+                        _buildVersion(context),
+                      ],
+                    ),
+                  );
+                },
+              ),
+              // Botão de toggle de tema
+              Positioned(
+                top: 8,
+                right: 8,
+                child: _buildThemeToggle(context),
+              ),
+            ],
           ),
         ),
       ),
     );
   }
 
-  Widget _buildLogo(double height) {
-    // Mantém proporção da logo (largura ≈ 1.45x altura)
+  Widget _buildThemeToggle(BuildContext context) {
+    final themeProvider = context.watch<ThemeProvider>();
+    final isDark = themeProvider.isDarkMode;
+
+    return IconButton(
+      onPressed: () => themeProvider.toggleTheme(),
+      icon: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 300),
+        transitionBuilder: (child, anim) => RotationTransition(
+          turns: Tween(begin: 0.75, end: 1.0).animate(anim),
+          child: FadeTransition(opacity: anim, child: child),
+        ),
+        child: Icon(
+          isDark ? Icons.light_mode : Icons.dark_mode,
+          key: ValueKey(isDark),
+          color: isDark ? AppTheme.primaryGold : const Color(0xFF5A5A7A),
+          size: 28,
+        ),
+      ),
+      tooltip: isDark ? 'Tema Claro' : 'Tema Escuro',
+    );
+  }
+
+  Widget _buildLogo(BuildContext context, double height) {
+    final colors = AppTheme.of(context);
     final width = height * 1.45;
     return SizedBox(
       width: width,
       height: height,
-      child: Image.asset('assets/logo.png', fit: BoxFit.contain),
+      child: Image.asset(colors.logoAsset, fit: BoxFit.contain),
     );
   }
 
-  Widget _buildTitle() {
-    return ShaderMask(
-      shaderCallback: (bounds) => const LinearGradient(
-        colors: [AppTheme.primaryGold, Color(0xFFE8C468)],
-      ).createShader(bounds),
-      child: const Text(
-        'PRÓ-VÔLEI SPY',
-        style: TextStyle(
-          fontSize: 36,
-          fontWeight: FontWeight.bold,
-          color: Colors.white,
-          letterSpacing: 2,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSubtitle() {
+  Widget _buildSubtitle(BuildContext context) {
+    final colors = AppTheme.of(context);
     return Text(
       'Gerenciador Profissional de Partidas',
       style: TextStyle(
         fontSize: 14,
-        color: Colors.white.withValues(alpha: 0.6),
+        color: colors.textSecondary,
         letterSpacing: 1,
       ),
     );
@@ -163,6 +183,7 @@ class HomeScreen extends StatelessWidget {
   }
 
   Widget _buildManageTeamsButton(BuildContext context) {
+    final colors = AppTheme.of(context);
     return TextButton.icon(
       onPressed: () {
         Navigator.push(
@@ -170,15 +191,16 @@ class HomeScreen extends StatelessWidget {
           MaterialPageRoute(builder: (context) => const TeamListScreen()),
         );
       },
-      icon: const Icon(Icons.people, color: Colors.white70),
-      label: const Text(
+      icon: Icon(Icons.people, color: colors.textSecondary),
+      label: Text(
         'GERENCIAR EQUIPES',
-        style: TextStyle(color: Colors.white70, fontSize: 16),
+        style: TextStyle(color: colors.textSecondary, fontSize: 16),
       ),
     );
   }
 
   Widget _buildReportsButton(BuildContext context) {
+    final colors = AppTheme.of(context);
     return TextButton.icon(
       onPressed: () {
         Navigator.push(
@@ -186,48 +208,49 @@ class HomeScreen extends StatelessWidget {
           MaterialPageRoute(builder: (context) => const ReportsScreen()),
         );
       },
-      icon: const Icon(Icons.folder_open, color: Colors.white70),
-      label: const Text(
+      icon: Icon(Icons.folder_open, color: colors.textSecondary),
+      label: Text(
         'VER RELATÓRIOS',
-        style: TextStyle(color: Colors.white70, fontSize: 16),
+        style: TextStyle(color: colors.textSecondary, fontSize: 16),
       ),
     );
   }
 
-  Widget _buildVersion() {
+  Widget _buildVersion(BuildContext context) {
+    final colors = AppTheme.of(context);
     return Text(
       'Versão 2.3',
       style: TextStyle(
         fontSize: 12,
-        color: Colors.white.withValues(alpha: 0.3),
+        color: colors.textHint,
       ),
     );
   }
 
   void _showMatchSetup(BuildContext context) async {
+    final colors = AppTheme.read(context);
     final hasSaved = await GameService.hasSavedMatch();
 
     if (hasSaved && context.mounted) {
-      // Há partida salva — perguntar se quer retomar
       showDialog(
         context: context,
         builder: (dialogContext) => AlertDialog(
-          backgroundColor: AppTheme.cardBackground,
+          backgroundColor: colors.dialogBackground,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
           ),
-          title: const Text(
+          title: Text(
             'Partida em Andamento',
-            style: TextStyle(color: Colors.white),
+            style: TextStyle(color: colors.text),
           ),
-          content: const Text(
+          content: Text(
             'Existe uma partida salva que não foi finalizada. Deseja retomar ou iniciar uma nova?',
-            style: TextStyle(color: Colors.white70),
+            style: TextStyle(color: colors.textSecondary),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(dialogContext),
-              child: const Text('CANCELAR', style: TextStyle(color: Colors.white70)),
+              child: Text('CANCELAR', style: TextStyle(color: colors.cancelButton)),
             ),
             TextButton(
               onPressed: () async {
@@ -262,7 +285,6 @@ class HomeScreen extends StatelessWidget {
         ),
       );
     } else if (context.mounted) {
-      // Sem partida salva — abrir configuração normal
       showDialog(
         context: context,
         builder: (context) => const MatchSetupDialog(),
@@ -284,13 +306,14 @@ class _MatchSetupDialogState extends State<MatchSetupDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = AppTheme.of(context);
     final teams = context.watch<StorageService>().teams;
 
     return AlertDialog(
-      backgroundColor: AppTheme.cardBackground,
-      title: const Text(
+      backgroundColor: colors.dialogBackground,
+      title: Text(
         'Configurar Partida',
-        style: TextStyle(color: Colors.white),
+        style: TextStyle(color: colors.text),
       ),
       content: SingleChildScrollView(
         child: Column(
@@ -314,7 +337,7 @@ class _MatchSetupDialogState extends State<MatchSetupDialog> {
       ),
       actions: [
         TextButton(
-          child: const Text('CANCELAR', style: TextStyle(color: Colors.white70)),
+          child: Text('CANCELAR', style: TextStyle(color: colors.cancelButton)),
           onPressed: () => Navigator.pop(context),
         ),
         ElevatedButton(
@@ -333,7 +356,6 @@ class _MatchSetupDialogState extends State<MatchSetupDialog> {
             if (_team2Id != null) {
               final t2 = storage.getTeam(_team2Id!);
               if (t2 != null) {
-                // Se ambas as equipes têm a mesma cor, usa cor padrão da equipe 2
                 if (t2.primaryColor.value == game.team1.primaryColor.value) {
                   game.setTeam(1, t2.copyWith(
                     primaryColor: Team.team2Default.primaryColor,
@@ -345,7 +367,7 @@ class _MatchSetupDialogState extends State<MatchSetupDialog> {
               }
             }
 
-            Navigator.pop(context); // Close dialog
+            Navigator.pop(context);
             Navigator.of(context).push(
               MaterialPageRoute(builder: (context) => const MatchScreen()),
             );
@@ -361,26 +383,27 @@ class _MatchSetupDialogState extends State<MatchSetupDialog> {
     String? value,
     ValueChanged<String?> onChanged,
   ) {
+    final colors = AppTheme.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           label,
-          style: const TextStyle(color: Colors.white70, fontSize: 12),
+          style: TextStyle(color: colors.textSecondary, fontSize: 12),
         ),
         const SizedBox(height: 4),
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 12),
           decoration: BoxDecoration(
-            color: AppTheme.surfaceLight,
+            color: colors.surface,
             borderRadius: BorderRadius.circular(8),
           ),
           child: DropdownButton<String>(
             value: value,
             isExpanded: true,
-            hint: const Text('Padrão', style: TextStyle(color: Colors.white38)),
-            dropdownColor: AppTheme.surfaceLight,
-            style: const TextStyle(color: Colors.white),
+            hint: Text('Padrão', style: TextStyle(color: colors.textHint)),
+            dropdownColor: colors.dropdownColor,
+            style: TextStyle(color: colors.text),
             underline: const SizedBox(),
             items: [
               const DropdownMenuItem(value: null, child: Text('Padrão')),

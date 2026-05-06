@@ -137,14 +137,15 @@ class _TeamEditorScreenState extends State<TeamEditorScreen> {
 
   Future<bool> _onWillPop() async {
     if (!_hasChanges) return true;
+    final colors = AppTheme.read(context);
     final result = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: AppTheme.cardBackground,
+        backgroundColor: colors.dialogBackground,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Text(
+        title: Text(
           'Salvar alterações?',
-          style: TextStyle(color: Colors.white, fontSize: 16),
+          style: TextStyle(color: colors.text, fontSize: 16),
           textAlign: TextAlign.center,
         ),
         actionsAlignment: MainAxisAlignment.center,
@@ -168,6 +169,8 @@ class _TeamEditorScreenState extends State<TeamEditorScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = AppTheme.of(context);
+
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, _) async {
@@ -178,29 +181,30 @@ class _TeamEditorScreenState extends State<TeamEditorScreen> {
       child: Scaffold(
       appBar: AppBar(
         title: Text(widget.team == null ? 'Nova Equipe' : 'Editar Equipe'),
-        backgroundColor: AppTheme.darkGradient.colors.first,
+        backgroundColor: colors.background,
+        foregroundColor: colors.text,
         actions: [IconButton(icon: const Icon(Icons.check), onPressed: _save)],
       ),
       body: Container(
-        decoration: const BoxDecoration(gradient: AppTheme.darkGradient),
+        decoration: BoxDecoration(gradient: colors.backgroundGradient),
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
             _buildSection('Informações Básicas'),
             Card(
-              color: AppTheme.cardBackground,
+              color: colors.card,
               child: Padding(
                 padding: const EdgeInsets.all(16),
                 child: Column(
                   children: [
                     TextField(
                       controller: _nameController,
-                      style: const TextStyle(color: Colors.white),
-                      decoration: const InputDecoration(
+                      style: TextStyle(color: colors.text),
+                      decoration: InputDecoration(
                         labelText: 'Nome da Equipe',
-                        labelStyle: TextStyle(color: Colors.white70),
+                        labelStyle: TextStyle(color: colors.textSecondary),
                         enabledBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(color: Colors.white24),
+                          borderSide: BorderSide(color: colors.border),
                         ),
                       ),
                     ),
@@ -221,11 +225,11 @@ class _TeamEditorScreenState extends State<TeamEditorScreen> {
               ],
             ),
             if (_players.isEmpty)
-              const Padding(
-                padding: EdgeInsets.all(16),
+              Padding(
+                padding: const EdgeInsets.all(16),
                 child: Text(
                   'Nenhum atleta cadastrado',
-                  style: TextStyle(color: Colors.white54),
+                  style: TextStyle(color: colors.textTertiary),
                   textAlign: TextAlign.center,
                 ),
               ),
@@ -233,7 +237,7 @@ class _TeamEditorScreenState extends State<TeamEditorScreen> {
               final index = entry.key;
               final player = entry.value;
               return Card(
-                color: AppTheme.surfaceLight,
+                color: colors.surface,
                 margin: const EdgeInsets.only(bottom: 8),
                 child: ListTile(
                   leading: CircleAvatar(
@@ -248,13 +252,13 @@ class _TeamEditorScreenState extends State<TeamEditorScreen> {
                   ),
                   title: Text(
                     player.name,
-                    style: const TextStyle(color: Colors.white),
+                    style: TextStyle(color: colors.text),
                   ),
                   trailing: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       IconButton(
-                        icon: const Icon(Icons.edit, color: Colors.white54),
+                        icon: Icon(Icons.edit, color: colors.textTertiary),
                         onPressed: () => _editPlayer(index),
                       ),
                       IconButton(
@@ -318,31 +322,33 @@ class _PlayerDialogState extends State<_PlayerDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = AppTheme.of(context);
+
     return AlertDialog(
-      backgroundColor: AppTheme.cardBackground,
+      backgroundColor: colors.dialogBackground,
       title: Text(
         widget.initialName == null ? 'Novo Atleta' : 'Editar Atleta',
-        style: const TextStyle(color: Colors.white),
+        style: TextStyle(color: colors.text),
       ),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           TextField(
             controller: _nameController,
-            style: const TextStyle(color: Colors.white),
-            decoration: const InputDecoration(
+            style: TextStyle(color: colors.text),
+            decoration: InputDecoration(
               labelText: 'Nome',
-              labelStyle: TextStyle(color: Colors.white70),
+              labelStyle: TextStyle(color: colors.textSecondary),
             ),
             textCapitalization: TextCapitalization.words,
           ),
           const SizedBox(height: 16),
           TextField(
             controller: _numberController,
-            style: const TextStyle(color: Colors.white),
-            decoration: const InputDecoration(
+            style: TextStyle(color: colors.text),
+            decoration: InputDecoration(
               labelText: 'Número',
-              labelStyle: TextStyle(color: Colors.white70),
+              labelStyle: TextStyle(color: colors.textSecondary),
             ),
             keyboardType: TextInputType.number,
           ),
@@ -350,7 +356,7 @@ class _PlayerDialogState extends State<_PlayerDialog> {
       ),
       actions: [
         TextButton(
-          child: const Text('CANCELAR', style: TextStyle(color: Colors.white70)),
+          child: Text('CANCELAR', style: TextStyle(color: colors.cancelButton)),
           onPressed: () => Navigator.pop(context),
         ),
         ElevatedButton(

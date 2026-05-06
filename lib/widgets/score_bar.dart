@@ -87,14 +87,16 @@ class ScoreDisplay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = AppTheme.of(context);
+
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 24),
       decoration: BoxDecoration(
-        gradient: AppTheme.darkGradient,
+        color: colors.card,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.3),
+            color: Colors.black.withValues(alpha: colors.isDark ? 0.3 : 0.1),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -104,18 +106,18 @@ class ScoreDisplay extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
           Expanded(
-            child: _buildTeamScore(team1Name, score1, team1Color),
+            child: _buildTeamScore(team1Name, score1, team1Color, colors),
           ),
-          _buildVs(),
+          _buildVs(colors),
           Expanded(
-            child: _buildTeamScore(team2Name, score2, team2Color),
+            child: _buildTeamScore(team2Name, score2, team2Color, colors),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildTeamScore(String name, int score, Color color) {
+  Widget _buildTeamScore(String name, int score, Color color, AppThemeColors colors) {
     return Column(
       children: [
         Text(
@@ -136,7 +138,7 @@ class ScoreDisplay extends StatelessWidget {
             return Text(
               '$value',
               style: TextStyle(
-                color: Colors.white,
+                color: colors.text,
                 fontSize: 56,
                 fontWeight: FontWeight.bold,
                 shadows: [
@@ -150,28 +152,28 @@ class ScoreDisplay extends StatelessWidget {
     );
   }
 
-  Widget _buildVs() {
+  Widget _buildVs(AppThemeColors colors) {
     return GestureDetector(
       onTap: onSwapTeams,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
-          color: AppTheme.surfaceLight,
+          color: colors.surface,
           borderRadius: BorderRadius.circular(8),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text(
+            Text(
               'VS',
               style: TextStyle(
-                color: Colors.white54,
+                color: colors.textTertiary,
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
               ),
             ),
             if (onSwapTeams != null)
-              const Icon(Icons.swap_horiz, color: Colors.white38, size: 14),
+              Icon(Icons.swap_horiz, color: colors.textHint, size: 14),
           ],
         ),
       ),

@@ -11,15 +11,18 @@ class TeamListScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = AppTheme.of(context);
+
     return Scaffold(
-      backgroundColor: AppTheme.darkGradient.colors.first,
+      backgroundColor: colors.background,
       appBar: AppBar(
         title: const Text('Gerenciar Equipes'),
         backgroundColor: Colors.transparent,
+        foregroundColor: colors.text,
         elevation: 0,
       ),
       body: Container(
-        decoration: const BoxDecoration(gradient: AppTheme.darkGradient),
+        decoration: BoxDecoration(gradient: colors.backgroundGradient),
         child: Consumer<StorageService>(
           builder: (context, storage, child) {
             final teams = storage.teams;
@@ -29,15 +32,15 @@ class TeamListScreen extends StatelessWidget {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(
+                    Icon(
                       Icons.people_outline,
                       size: 64,
-                      color: Colors.white24,
+                      color: colors.textHint,
                     ),
                     const SizedBox(height: 16),
-                    const Text(
+                    Text(
                       'Nenhuma equipe cadastrada',
-                      style: TextStyle(color: Colors.white54, fontSize: 16),
+                      style: TextStyle(color: colors.textTertiary, fontSize: 16),
                     ),
                     const SizedBox(height: 24),
                     GradientButton(
@@ -70,38 +73,13 @@ class TeamListScreen extends StatelessWidget {
                     child: const Icon(Icons.delete, color: Colors.white),
                   ),
                   confirmDismiss: (direction) async {
-                    return await showDialog(
-                      context: context,
-                      builder: (ctx) => AlertDialog(
-                        backgroundColor: AppTheme.cardBackground,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                        title: Text(
-                          'Deseja excluir a equipe ${team.name}?',
-                          style: const TextStyle(color: Colors.white, fontSize: 16),
-                          textAlign: TextAlign.center,
-                        ),
-                        actionsAlignment: MainAxisAlignment.center,
-                        actions: [
-                          TextButton(
-                            child: const Text('CANCELAR', style: TextStyle(color: Colors.white70)),
-                            onPressed: () => Navigator.pop(ctx, false),
-                          ),
-                          TextButton(
-                            child: const Text(
-                              'EXCLUIR',
-                              style: TextStyle(color: AppTheme.error),
-                            ),
-                            onPressed: () => Navigator.pop(ctx, true),
-                          ),
-                        ],
-                      ),
-                    );
+                    return await _showDeleteDialog(context, team.name);
                   },
                   onDismissed: (_) {
                     storage.deleteTeam(team.id);
                   },
                   child: Card(
-                    color: AppTheme.cardBackground,
+                    color: colors.card,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
@@ -118,14 +96,14 @@ class TeamListScreen extends StatelessWidget {
                       ),
                       title: Text(
                         team.name,
-                        style: const TextStyle(
-                          color: Colors.white,
+                        style: TextStyle(
+                          color: colors.text,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                       subtitle: Text(
                         '${team.players.length} atletas',
-                        style: const TextStyle(color: Colors.white70),
+                        style: TextStyle(color: colors.textSecondary),
                       ),
                       trailing: Row(
                         mainAxisSize: MainAxisSize.min,
@@ -133,26 +111,11 @@ class TeamListScreen extends StatelessWidget {
                           IconButton(
                             icon: const Icon(Icons.delete_outline, color: Colors.red, size: 20),
                             onPressed: () async {
-                              final confirm = await showDialog<bool>(
-                                context: context,
-                                builder: (ctx) => AlertDialog(
-                                  backgroundColor: AppTheme.cardBackground,
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                                  title: Text('Deseja excluir a equipe ${team.name}?', style: const TextStyle(color: Colors.white, fontSize: 16), textAlign: TextAlign.center),
-                                  actionsAlignment: MainAxisAlignment.center,
-                                  actions: [
-                                    TextButton(child: const Text('CANCELAR', style: TextStyle(color: Colors.white70)), onPressed: () => Navigator.pop(ctx, false)),
-                                    TextButton(
-                                      child: const Text('EXCLUIR', style: TextStyle(color: AppTheme.error)),
-                                      onPressed: () => Navigator.pop(ctx, true),
-                                    ),
-                                  ],
-                                ),
-                              );
+                              final confirm = await _showDeleteDialog(context, team.name);
                               if (confirm == true) storage.deleteTeam(team.id);
                             },
                           ),
-                          const Icon(Icons.edit, color: Colors.white54),
+                          Icon(Icons.edit, color: colors.textTertiary),
                         ],
                       ),
                       onTap: () => _openEditor(context, team: team),
@@ -168,6 +131,33 @@ class TeamListScreen extends StatelessWidget {
         backgroundColor: AppTheme.primaryGold,
         child: const Icon(Icons.add),
         onPressed: () => _openEditor(context),
+      ),
+    );
+  }
+
+  Future<bool?> _showDeleteDialog(BuildContext context, String teamName) {
+    final colors = AppTheme.read(context);
+    return showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: colors.dialogBackground,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Text(
+          'Deseja excluir a equipe $teamName?',
+          style: TextStyle(color: colors.text, fontSize: 16),
+          textAlign: TextAlign.center,
+        ),
+        actionsAlignment: MainAxisAlignment.center,
+        actions: [
+          TextButton(
+            child: Text('CANCELAR', style: TextStyle(color: colors.cancelButton)),
+            onPressed: () => Navigator.pop(ctx, false),
+          ),
+          TextButton(
+            child: const Text('EXCLUIR', style: TextStyle(color: AppTheme.error)),
+            onPressed: () => Navigator.pop(ctx, true),
+          ),
+        ],
       ),
     );
   }

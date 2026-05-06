@@ -16,9 +16,11 @@ class MatchScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = AppTheme.of(context);
+
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(gradient: AppTheme.darkGradient),
+        decoration: BoxDecoration(gradient: colors.backgroundGradient),
         child: SafeArea(
           child: LayoutBuilder(
             builder: (context, constraints) {
@@ -57,6 +59,8 @@ class MatchScreen extends StatelessWidget {
   }
 
   Widget _buildHeader(BuildContext context) {
+    final colors = AppTheme.of(context);
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Row(
@@ -67,7 +71,7 @@ class MatchScreen extends StatelessWidget {
             child: Align(
               alignment: Alignment.centerLeft,
               child: IconButton(
-                icon: const Icon(Icons.arrow_back_ios, color: Colors.white70),
+                icon: Icon(Icons.arrow_back_ios, color: colors.textSecondary),
                 onPressed: () => _showExitDialog(context),
               ),
             ),
@@ -99,15 +103,15 @@ class MatchScreen extends StatelessWidget {
                         children: [
                           Text(
                             game.matchName,
-                            style: const TextStyle(
-                              color: Colors.white54,
+                            style: TextStyle(
+                              color: colors.textTertiary,
                               fontSize: 12,
                             ),
                           ),
                           const SizedBox(width: 4),
-                          const Icon(
+                          Icon(
                             Icons.edit,
-                            color: Colors.white38,
+                            color: colors.textHint,
                             size: 12,
                           ),
                         ],
@@ -147,7 +151,7 @@ class MatchScreen extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: isRunning
                         ? Colors.green.withValues(alpha: 0.2)
-                        : AppTheme.surfaceLight,
+                        : colors.surface,
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
                       color: isRunning
@@ -207,6 +211,8 @@ class MatchScreen extends StatelessWidget {
   }
 
   Widget _buildTeamPanels(BuildContext context) {
+    final colors = AppTheme.of(context);
+
     return Consumer<GameService>(
       builder: (context, game, _) {
         return LayoutBuilder(
@@ -229,18 +235,20 @@ class MatchScreen extends StatelessWidget {
                     margin: const EdgeInsets.symmetric(horizontal: 16),
                     padding: const EdgeInsets.symmetric(vertical: 4),
                     decoration: BoxDecoration(
-                      color: AppTheme.cardBackground,
+                      color: colors.card,
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: TabBar(
                       indicatorSize: TabBarIndicatorSize.tab,
                       indicatorWeight: 3,
                       dividerHeight: 0,
-                      labelColor: Colors.white,
-                      unselectedLabelColor: Colors.white38,
+                      labelColor: colors.text,
+                      unselectedLabelColor: colors.textHint,
                       indicator: BoxDecoration(
                         borderRadius: BorderRadius.circular(10),
-                        color: Colors.white.withValues(alpha: 0.1),
+                        color: colors.isDark
+                            ? Colors.white.withValues(alpha: 0.1)
+                            : Colors.black.withValues(alpha: 0.05),
                       ),
                       tabs: [
                         Tab(
@@ -441,6 +449,7 @@ class MatchScreen extends StatelessWidget {
   }
 
   void _showEditTeamNameDialog(BuildContext context, int teamIndex) {
+    final colors = AppTheme.read(context);
     final game = context.read<GameService>();
     final currentName = teamIndex == 0 ? game.team1.name : game.team2.name;
     final controller = TextEditingController(text: currentName);
@@ -448,20 +457,20 @@ class MatchScreen extends StatelessWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: AppTheme.cardBackground,
+        backgroundColor: colors.dialogBackground,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: Text(
           'Editar ${teamIndex == 0 ? "Equipe 1" : "Equipe 2"}',
-          style: const TextStyle(color: Colors.white),
+          style: TextStyle(color: colors.text),
         ),
         content: TextField(
           controller: controller,
-          style: const TextStyle(color: Colors.white),
+          style: TextStyle(color: colors.text),
           decoration: InputDecoration(
             hintText: 'Nome da equipe',
-            hintStyle: const TextStyle(color: Colors.white38),
+            hintStyle: TextStyle(color: colors.textHint),
             filled: true,
-            fillColor: AppTheme.surfaceLight,
+            fillColor: colors.surface,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide.none,
@@ -472,7 +481,7 @@ class MatchScreen extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('CANCELAR', style: TextStyle(color: Colors.white70)),
+            child: Text('CANCELAR', style: TextStyle(color: colors.cancelButton)),
           ),
           ElevatedButton(
             onPressed: () {
@@ -489,26 +498,27 @@ class MatchScreen extends StatelessWidget {
   }
 
   void _showEditMatchNameDialog(BuildContext context) {
+    final colors = AppTheme.read(context);
     final game = context.read<GameService>();
     final controller = TextEditingController(text: game.matchName);
 
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: AppTheme.cardBackground,
+        backgroundColor: colors.dialogBackground,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Text(
+        title: Text(
           'Nome da Partida',
-          style: TextStyle(color: Colors.white),
+          style: TextStyle(color: colors.text),
         ),
         content: TextField(
           controller: controller,
-          style: const TextStyle(color: Colors.white),
+          style: TextStyle(color: colors.text),
           decoration: InputDecoration(
             hintText: 'Ex: Campeonato Regional',
-            hintStyle: const TextStyle(color: Colors.white38),
+            hintStyle: TextStyle(color: colors.textHint),
             filled: true,
-            fillColor: AppTheme.surfaceLight,
+            fillColor: colors.surface,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide.none,
@@ -519,7 +529,7 @@ class MatchScreen extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('CANCELAR', style: TextStyle(color: Colors.white70)),
+            child: Text('CANCELAR', style: TextStyle(color: colors.cancelButton)),
           ),
           ElevatedButton(
             onPressed: () {
@@ -534,23 +544,25 @@ class MatchScreen extends StatelessWidget {
   }
 
   void _showExitDialog(BuildContext context) {
+    final colors = AppTheme.read(context);
+
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        backgroundColor: AppTheme.cardBackground,
+        backgroundColor: colors.dialogBackground,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Text(
+        title: Text(
           'Sair da Partida?',
-          style: TextStyle(color: Colors.white),
+          style: TextStyle(color: colors.text),
         ),
-        content: const Text(
+        content: Text(
           'Você pode salvar o progresso e voltar depois.',
-          style: TextStyle(color: Colors.white70),
+          style: TextStyle(color: colors.textSecondary),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),
-            child: const Text('CANCELAR', style: TextStyle(color: Colors.white70)),
+            child: Text('CANCELAR', style: TextStyle(color: colors.cancelButton)),
           ),
           TextButton(
             onPressed: () async {
@@ -581,6 +593,7 @@ class MatchScreen extends StatelessWidget {
   }
 
   Future<void> _finishSet(BuildContext context) async {
+    final colors = AppTheme.read(context);
     final game = context.read<GameService>();
     final setData = game.finishCurrentSet();
 
@@ -608,7 +621,7 @@ class MatchScreen extends StatelessWidget {
       final shouldOpen = await showDialog<bool>(
         context: context,
         builder: (context) => AlertDialog(
-          backgroundColor: AppTheme.cardBackground,
+          backgroundColor: colors.dialogBackground,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
           ),
@@ -616,17 +629,17 @@ class MatchScreen extends StatelessWidget {
             children: [
               Icon(Icons.check_circle, color: AppTheme.success, size: 28),
               const SizedBox(width: 12),
-              const Text('PDF Gerado!', style: TextStyle(color: Colors.white)),
+              Text('PDF Gerado!', style: TextStyle(color: colors.text)),
             ],
           ),
           content: Text(
             'Relatório do Set ${setData.setNumber} salvo com sucesso.',
-            style: const TextStyle(color: Colors.white70),
+            style: TextStyle(color: colors.textSecondary),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),
-              child: const Text('FECHAR', style: TextStyle(color: Colors.white70)),
+              child: Text('FECHAR', style: TextStyle(color: colors.cancelButton)),
             ),
             ElevatedButton.icon(
               onPressed: () async {
@@ -661,6 +674,7 @@ class MatchScreen extends StatelessWidget {
   }
 
   Future<void> _finishMatch(BuildContext context) async {
+    final colors = AppTheme.read(context);
     final game = context.read<GameService>();
 
     showDialog(
@@ -685,15 +699,13 @@ class MatchScreen extends StatelessWidget {
     Navigator.pop(context);
 
     if (file != null) {
-      // Salva no storage de relatórios (e finaliza a partida)
       await ReportStorageService.addFinalReport(game.matchName, file.path);
-      // Limpa estado salvo (partida finalizada normalmente)
       await GameService.clearSavedMatch();
-      // Mostra diálogo de confirmação
+
       final shouldOpen = await showDialog<bool>(
         context: context,
         builder: (context) => AlertDialog(
-          backgroundColor: AppTheme.cardBackground,
+          backgroundColor: colors.dialogBackground,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
           ),
@@ -701,20 +713,20 @@ class MatchScreen extends StatelessWidget {
             children: [
               Icon(Icons.emoji_events, color: AppTheme.primaryGold, size: 28),
               const SizedBox(width: 12),
-              const Text(
+              Text(
                 'Partida Finalizada!',
-                style: TextStyle(color: Colors.white),
+                style: TextStyle(color: colors.text),
               ),
             ],
           ),
-          content: const Text(
+          content: Text(
             'Relatório completo da partida salvo com sucesso.',
-            style: TextStyle(color: Colors.white70),
+            style: TextStyle(color: colors.textSecondary),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),
-              child: const Text('FECHAR', style: TextStyle(color: Colors.white70)),
+              child: Text('FECHAR', style: TextStyle(color: colors.cancelButton)),
             ),
             ElevatedButton.icon(
               onPressed: () async {

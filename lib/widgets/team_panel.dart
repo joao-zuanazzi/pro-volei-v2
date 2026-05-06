@@ -45,21 +45,23 @@ class TeamPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = AppTheme.of(context);
+
     Widget content = SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       physics: isExpanded ? null : const NeverScrollableScrollPhysics(),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          _buildTypeSelector(),
+          _buildTypeSelector(colors),
           if (selectedType != null) ...[
             const SizedBox(height: 16),
-            _buildDetailSelector(),
+            _buildDetailSelector(colors),
           ],
           if (selectedType != null &&
               selectedType != PointType.opponentError) ...[
             const SizedBox(height: 16),
-            _buildPlayerSelector(),
+            _buildPlayerSelector(colors),
           ],
           const SizedBox(height: 24),
           _buildActions(context),
@@ -67,14 +69,10 @@ class TeamPanel extends StatelessWidget {
       ),
     );
 
-    if (isExpanded) {
-      content = Expanded(child: content);
-    }
-
     return Container(
       margin: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        color: AppTheme.cardBackground,
+        color: colors.card,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: teamColor.withValues(alpha: 0.3), width: 1),
         boxShadow: [
@@ -91,11 +89,11 @@ class TeamPanel extends StatelessWidget {
     );
   }
 
-  Widget _buildTypeSelector() {
+  Widget _buildTypeSelector(AppThemeColors colors) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildLabel('Tipo de Ponto'),
+        _buildLabel('Tipo de Ponto', colors),
         const SizedBox(height: 8),
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
@@ -113,7 +111,7 @@ class TeamPanel extends StatelessWidget {
                       vertical: 10,
                     ),
                     decoration: BoxDecoration(
-                      color: isSelected ? teamColor : AppTheme.surfaceLight,
+                      color: isSelected ? teamColor : colors.surface,
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
                         color: isSelected ? teamColor : Colors.transparent,
@@ -128,7 +126,7 @@ class TeamPanel extends StatelessWidget {
                         Text(
                           type.label,
                           style: TextStyle(
-                            color: isSelected ? Colors.white : Colors.white70,
+                            color: isSelected ? Colors.white : colors.textSecondary,
                             fontSize: 13,
                             fontWeight: isSelected
                                 ? FontWeight.w600
@@ -147,13 +145,13 @@ class TeamPanel extends StatelessWidget {
     );
   }
 
-  Widget _buildDetailSelector() {
+  Widget _buildDetailSelector(AppThemeColors colors) {
     if (selectedType == null) return const SizedBox();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildLabel('Detalhe'),
+        _buildLabel('Detalhe', colors),
         const SizedBox(height: 8),
         Wrap(
           spacing: 8,
@@ -169,7 +167,7 @@ class TeamPanel extends StatelessWidget {
                   vertical: 10,
                 ),
                 decoration: BoxDecoration(
-                  color: isSelected ? teamColor : AppTheme.surfaceLight,
+                  color: isSelected ? teamColor : colors.surface,
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
                     color: isSelected ? teamColor : Colors.transparent,
@@ -179,7 +177,7 @@ class TeamPanel extends StatelessWidget {
                 child: Text(
                   detail.label,
                   style: TextStyle(
-                    color: isSelected ? Colors.white : Colors.white70,
+                    color: isSelected ? Colors.white : colors.textSecondary,
                     fontSize: 13,
                     fontWeight: isSelected
                         ? FontWeight.w600
@@ -194,7 +192,7 @@ class TeamPanel extends StatelessWidget {
     );
   }
 
-  Widget _buildPlayerSelector() {
+  Widget _buildPlayerSelector(AppThemeColors colors) {
     final targetPlayers = selectedType == PointType.opponentError
         ? opponentPlayers
         : players;
@@ -212,6 +210,7 @@ class TeamPanel extends StatelessWidget {
           selectedType == PointType.opponentError
               ? 'Quem errou (Equipe Adversária)?'
               : 'Quem marcou?',
+          colors,
         ),
         const SizedBox(height: 8),
         Wrap(
@@ -228,7 +227,7 @@ class TeamPanel extends StatelessWidget {
                   vertical: 10,
                 ),
                 decoration: BoxDecoration(
-                  color: isSelected ? teamColor : AppTheme.surfaceLight,
+                  color: isSelected ? teamColor : colors.surface,
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
                     color: isSelected ? teamColor : Colors.transparent,
@@ -240,15 +239,17 @@ class TeamPanel extends StatelessWidget {
                   children: [
                     Container(
                       padding: const EdgeInsets.all(4),
-                      decoration: const BoxDecoration(
-                        color: Colors.white24,
+                      decoration: BoxDecoration(
+                        color: isSelected
+                            ? Colors.white24
+                            : teamColor.withValues(alpha: 0.2),
                         shape: BoxShape.circle,
                       ),
                       child: Text(
                         '${player.number}',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 10,
-                          color: Colors.white,
+                          color: isSelected ? Colors.white : colors.text,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -257,7 +258,7 @@ class TeamPanel extends StatelessWidget {
                     Text(
                       player.name.split(' ').first,
                       style: TextStyle(
-                        color: isSelected ? Colors.white : Colors.white70,
+                        color: isSelected ? Colors.white : colors.textSecondary,
                         fontSize: 13,
                         fontWeight: isSelected
                             ? FontWeight.w600
@@ -327,11 +328,11 @@ class TeamPanel extends StatelessWidget {
     );
   }
 
-  Widget _buildLabel(String text) {
+  Widget _buildLabel(String text, AppThemeColors colors) {
     return Text(
       text,
-      style: const TextStyle(
-        color: Colors.white54,
+      style: TextStyle(
+        color: colors.textTertiary,
         fontSize: 12,
         fontWeight: FontWeight.w500,
         letterSpacing: 0.5,
