@@ -40,6 +40,12 @@ Este documento registra decisões de design, bugs corrigidos e armadilhas para q
 - **Solução**: `AppTheme.of()` agora usa `context.read()` internamente. A reatividade é garantida pelo `Consumer<ThemeProvider>` no `MaterialApp` que reconstrói toda a árvore ao trocar o tema.
 - **REGRA**: NUNCA use `context.watch<ThemeProvider>()` diretamente. Sempre `AppTheme.of(context)`.
 
+### HomeScreen é const → Consumer<ThemeProvider> sozinho NÃO reconstrói ela
+- **Armadilha**: A regra acima ("AppTheme.of(context) basta porque o Consumer reconstrói tudo") tem uma exceção: em `main.dart`, `home: const HomeScreen()`. Quando o `Consumer<ThemeProvider>` rebuilda o `MaterialApp`, a HomeScreen const é considerada idêntica e NÃO é reconstruída. Como `AppTheme.of()` usa `context.read()`, a HomeScreen não se inscreve no provider — então cores, logo e o ícone do toggle ficam congelados ao trocar de tema.
+- **Solução**: `_buildThemeToggle` em `home_screen.dart` chama `context.watch<ThemeProvider>()` recebendo o context da HomeScreen via parâmetro, o que inscreve a tela inteira. Esse watch é uma EXCEÇÃO INTENCIONAL à regra acima — está documentado em comentário no código.
+- **Outras telas (match, reports, team_*)**: funcionam porque são pushed via `Navigator.push` (sem `const`), então rebuildam ao serem navegadas e Material widgets internos respondem ao `Theme.of(context)`.
+- **Se for adicionar uma nova tela acessível como `home:` const no MaterialApp** ou se notar que toggle de tema não atualiza alguma tela: incluir um `context.watch<ThemeProvider>()` em algum ponto da `build()` dela.
+
 ### share_plus API
 - **Versão**: `share_plus: ^10.1.4`
 - **API correta**: `Share.shareXFiles([XFile(path)], subject: '...')`

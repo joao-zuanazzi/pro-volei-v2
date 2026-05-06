@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 import '../models/match_report.dart';
 
@@ -72,7 +73,7 @@ class ReportStorageService {
 
       return _cachedReports;
     } catch (e) {
-      print('Erro ao carregar relatórios: $e');
+      debugPrint('Erro ao carregar relatórios: $e');
       return [];
     }
   }
@@ -98,7 +99,7 @@ class ReportStorageService {
       final jsonList = reports.map((r) => r.toJson()).toList();
       await file.writeAsString(json.encode(jsonList));
     } catch (e) {
-      print('Erro ao salvar relatórios: $e');
+      debugPrint('Erro ao salvar relatórios: $e');
     }
   }
 

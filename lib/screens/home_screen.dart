@@ -98,6 +98,13 @@ class HomeScreen extends StatelessWidget {
   }
 
   Widget _buildThemeToggle(BuildContext context) {
+    // EXCEÇÃO INTENCIONAL à regra "não usar context.watch<ThemeProvider>".
+    // Em main.dart, a HomeScreen é `home: const HomeScreen()`. O Consumer no
+    // MaterialApp reconstrói só o MaterialApp; por ser const, a HomeScreen
+    // não é reconstruída automaticamente. Esse `watch` (recebendo o context
+    // da HomeScreen via parâmetro) inscreve a tela inteira no ThemeProvider,
+    // garantindo que cores, logo e o próprio ícone do toggle se atualizem
+    // ao trocar de tema. NÃO TROCAR para context.read.
     final themeProvider = context.watch<ThemeProvider>();
     final isDark = themeProvider.isDarkMode;
 
@@ -356,7 +363,7 @@ class _MatchSetupDialogState extends State<MatchSetupDialog> {
             if (_team2Id != null) {
               final t2 = storage.getTeam(_team2Id!);
               if (t2 != null) {
-                if (t2.primaryColor.value == game.team1.primaryColor.value) {
+                if (t2.primaryColor == game.team1.primaryColor) {
                   game.setTeam(1, t2.copyWith(
                     primaryColor: Team.team2Default.primaryColor,
                     secondaryColor: Team.team2Default.secondaryColor,

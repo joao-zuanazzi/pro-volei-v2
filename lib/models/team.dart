@@ -55,8 +55,8 @@ class Team {
   Map<String, dynamic> toJson() => {
     'id': id,
     'name': name,
-    'primaryColor': primaryColor.value,
-    'secondaryColor': secondaryColor.value,
+    'primaryColor': primaryColor.toARGB32(),
+    'secondaryColor': secondaryColor.toARGB32(),
     'players': players.map((p) => p.toMap()).toList(),
   };
 
@@ -92,8 +92,8 @@ class TeamAdapter extends TypeAdapter<Team> {
   void write(BinaryWriter writer, Team obj) {
     writer.writeString(obj.id);
     writer.writeString(obj.name);
-    writer.writeInt(obj.primaryColor.value);
-    writer.writeInt(obj.secondaryColor.value);
+    writer.writeInt(obj.primaryColor.toARGB32());
+    writer.writeInt(obj.secondaryColor.toARGB32());
     writer.writeList(obj.players);
   }
 }

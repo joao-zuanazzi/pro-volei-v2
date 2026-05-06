@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:path_provider/path_provider.dart';
@@ -147,12 +148,15 @@ class PdfService {
 
           stats[pid]!['total'] = stats[pid]!['total']! + 1;
 
-          if (point.type.label == 'Saque')
+          if (point.type.label == 'Saque') {
             stats[pid]!['serve'] = stats[pid]!['serve']! + 1;
-          if (point.type.label == 'Bloqueio')
+          }
+          if (point.type.label == 'Bloqueio') {
             stats[pid]!['block'] = stats[pid]!['block']! + 1;
-          if (point.type.label == 'Ataque')
+          }
+          if (point.type.label == 'Ataque') {
             stats[pid]!['attack'] = stats[pid]!['attack']! + 1;
+          }
         }
       }
       return stats;
@@ -370,304 +374,6 @@ class PdfService {
     );
   }
 
-  /// Tabela de erros por jogador (quem cometeu os erros)
-  static pw.Widget _buildPlayerErrorsTable(
-    List<SetData> sets,
-    Team team1,
-    Team team2,
-  ) {
-    // Helper para calcular erros de jogador
-    // Procura pontos do tipo opponentError e extrai o playerId (que é do time adversário)
-    Map<String, Map<String, int>> getPlayerErrors(
-      int opponentTeamIndex, // O time que COMETEU os erros
-      List<SetData> sets,
-    ) {
-      final errors = <String, Map<String, int>>{};
-
-      for (final set in sets) {
-        // Pontos de "Erro do Adversário" marcados pelo time OPOSTO
-        // Se opponentTeamIndex == 0, procuramos erros marcados pelo time 1 (teamIndex == 1)
-        final scoringTeamIndex = opponentTeamIndex == 0 ? 1 : 0;
-        final points = set.points.where(
-          (p) =>
-              p.teamIndex == scoringTeamIndex &&
-              p.type.label == 'Erro do Adversário' &&
-              p.playerId != null,
-        );
-        for (final point in points) {
-          final pid = point.playerId!;
-          if (!errors.containsKey(pid)) {
-            errors[pid] = {
-              'total': 0,
-              'serve': 0,
-              'reception': 0,
-              'attack': 0,
-              'other': 0,
-            };
-          }
-
-          errors[pid]!['total'] = errors[pid]!['total']! + 1;
-
-          // Categorizar por tipo de erro usando o detail
-          final detailLabel = point.detail?.label ?? '';
-          if (detailLabel == 'Saque') {
-            errors[pid]!['serve'] = errors[pid]!['serve']! + 1;
-          } else if (detailLabel == 'Recepção') {
-            errors[pid]!['reception'] = errors[pid]!['reception']! + 1;
-          } else if (detailLabel == 'Ataque') {
-            errors[pid]!['attack'] = errors[pid]!['attack']! + 1;
-          } else {
-            errors[pid]!['other'] = errors[pid]!['other']! + 1;
-          }
-        }
-      }
-      return errors;
-    }
-
-    final errors1 = getPlayerErrors(0, sets); // Erros cometidos pelo time 1
-    final errors2 = getPlayerErrors(1, sets); // Erros cometidos pelo time 2
-
-    // Se não houver erros registrados, não mostra a seção
-    if (errors1.isEmpty && errors2.isEmpty) {
-      return pw.SizedBox();
-    }
-
-    return pw.Column(
-      crossAxisAlignment: pw.CrossAxisAlignment.start,
-      children: [
-        pw.Text(
-          'ERROS POR JOGADOR',
-          style: pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold),
-        ),
-        pw.SizedBox(height: 10),
-        pw.Table(
-          border: pw.TableBorder.all(color: PdfColors.grey400),
-          children: [
-            // Header
-            pw.TableRow(
-              decoration: const pw.BoxDecoration(color: PdfColors.red800),
-              children: [
-                pw.Padding(
-                  padding: const pw.EdgeInsets.all(8),
-                  child: pw.Text(
-                    'Equipe / Atleta',
-                    style: pw.TextStyle(
-                      color: PdfColors.white,
-                      fontWeight: pw.FontWeight.bold,
-                    ),
-                  ),
-                ),
-                pw.Padding(
-                  padding: const pw.EdgeInsets.all(8),
-                  child: pw.Text(
-                    'Erros',
-                    style: pw.TextStyle(
-                      color: PdfColors.white,
-                      fontWeight: pw.FontWeight.bold,
-                    ),
-                    textAlign: pw.TextAlign.center,
-                  ),
-                ),
-                pw.Padding(
-                  padding: const pw.EdgeInsets.all(8),
-                  child: pw.Text(
-                    'Saque',
-                    style: pw.TextStyle(
-                      color: PdfColors.white,
-                      fontWeight: pw.FontWeight.bold,
-                    ),
-                    textAlign: pw.TextAlign.center,
-                  ),
-                ),
-                pw.Padding(
-                  padding: const pw.EdgeInsets.all(8),
-                  child: pw.Text(
-                    'Recep.',
-                    style: pw.TextStyle(
-                      color: PdfColors.white,
-                      fontWeight: pw.FontWeight.bold,
-                    ),
-                    textAlign: pw.TextAlign.center,
-                  ),
-                ),
-                pw.Padding(
-                  padding: const pw.EdgeInsets.all(8),
-                  child: pw.Text(
-                    'Ataque',
-                    style: pw.TextStyle(
-                      color: PdfColors.white,
-                      fontWeight: pw.FontWeight.bold,
-                    ),
-                    textAlign: pw.TextAlign.center,
-                  ),
-                ),
-                pw.Padding(
-                  padding: const pw.EdgeInsets.all(8),
-                  child: pw.Text(
-                    'Outros',
-                    style: pw.TextStyle(
-                      color: PdfColors.white,
-                      fontWeight: pw.FontWeight.bold,
-                    ),
-                    textAlign: pw.TextAlign.center,
-                  ),
-                ),
-              ],
-            ),
-            // Team 1 errors
-            if (errors1.isNotEmpty) ...[
-              pw.TableRow(
-                decoration: pw.BoxDecoration(color: PdfColors.red50),
-                children: [
-                  pw.Padding(
-                    padding: const pw.EdgeInsets.all(8),
-                    child: pw.Text(
-                      team1.name,
-                      style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
-                    ),
-                  ),
-                  pw.SizedBox(),
-                  pw.SizedBox(),
-                  pw.SizedBox(),
-                  pw.SizedBox(),
-                  pw.SizedBox(),
-                ],
-              ),
-              ...errors1.entries.map((entry) {
-                final player = team1.players.firstWhere(
-                  (p) => p.id == entry.key,
-                  orElse: () => Player(id: '', name: 'Jogador', number: 0),
-                );
-                final e = entry.value;
-                return pw.TableRow(
-                  children: [
-                    pw.Padding(
-                      padding: const pw.EdgeInsets.only(
-                        left: 16,
-                        top: 4,
-                        bottom: 4,
-                      ),
-                      child: pw.Text('#${player.number} ${player.name}'),
-                    ),
-                    pw.Padding(
-                      padding: const pw.EdgeInsets.all(4),
-                      child: pw.Text(
-                        '${e['total']}',
-                        textAlign: pw.TextAlign.center,
-                      ),
-                    ),
-                    pw.Padding(
-                      padding: const pw.EdgeInsets.all(4),
-                      child: pw.Text(
-                        '${e['serve']}',
-                        textAlign: pw.TextAlign.center,
-                      ),
-                    ),
-                    pw.Padding(
-                      padding: const pw.EdgeInsets.all(4),
-                      child: pw.Text(
-                        '${e['reception']}',
-                        textAlign: pw.TextAlign.center,
-                      ),
-                    ),
-                    pw.Padding(
-                      padding: const pw.EdgeInsets.all(4),
-                      child: pw.Text(
-                        '${e['attack']}',
-                        textAlign: pw.TextAlign.center,
-                      ),
-                    ),
-                    pw.Padding(
-                      padding: const pw.EdgeInsets.all(4),
-                      child: pw.Text(
-                        '${e['other']}',
-                        textAlign: pw.TextAlign.center,
-                      ),
-                    ),
-                  ],
-                );
-              }),
-            ],
-            // Team 2 errors
-            if (errors2.isNotEmpty) ...[
-              pw.TableRow(
-                decoration: pw.BoxDecoration(color: PdfColors.red50),
-                children: [
-                  pw.Padding(
-                    padding: const pw.EdgeInsets.all(8),
-                    child: pw.Text(
-                      team2.name,
-                      style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
-                    ),
-                  ),
-                  pw.SizedBox(),
-                  pw.SizedBox(),
-                  pw.SizedBox(),
-                  pw.SizedBox(),
-                  pw.SizedBox(),
-                ],
-              ),
-              ...errors2.entries.map((entry) {
-                final player = team2.players.firstWhere(
-                  (p) => p.id == entry.key,
-                  orElse: () => Player(id: '', name: 'Jogador', number: 0),
-                );
-                final e = entry.value;
-                return pw.TableRow(
-                  children: [
-                    pw.Padding(
-                      padding: const pw.EdgeInsets.only(
-                        left: 16,
-                        top: 4,
-                        bottom: 4,
-                      ),
-                      child: pw.Text('#${player.number} ${player.name}'),
-                    ),
-                    pw.Padding(
-                      padding: const pw.EdgeInsets.all(4),
-                      child: pw.Text(
-                        '${e['total']}',
-                        textAlign: pw.TextAlign.center,
-                      ),
-                    ),
-                    pw.Padding(
-                      padding: const pw.EdgeInsets.all(4),
-                      child: pw.Text(
-                        '${e['serve']}',
-                        textAlign: pw.TextAlign.center,
-                      ),
-                    ),
-                    pw.Padding(
-                      padding: const pw.EdgeInsets.all(4),
-                      child: pw.Text(
-                        '${e['reception']}',
-                        textAlign: pw.TextAlign.center,
-                      ),
-                    ),
-                    pw.Padding(
-                      padding: const pw.EdgeInsets.all(4),
-                      child: pw.Text(
-                        '${e['attack']}',
-                        textAlign: pw.TextAlign.center,
-                      ),
-                    ),
-                    pw.Padding(
-                      padding: const pw.EdgeInsets.all(4),
-                      child: pw.Text(
-                        '${e['other']}',
-                        textAlign: pw.TextAlign.center,
-                      ),
-                    ),
-                  ],
-                );
-              }),
-            ],
-          ],
-        ),
-      ],
-    );
-  }
-
   /// Tabela detalhada de pontos por tipo e detalhe
   static pw.Widget _buildPointDetailsTable(
     List<SetData> sets,
@@ -682,7 +388,7 @@ class PdfService {
         final points = set.points.where((p) => p.teamIndex == teamIndex);
         for (final point in points) {
           final typeLabel = point.type.label;
-          final detailLabel = point.detail?.label ?? 'N/A';
+          final detailLabel = point.detail.label;
 
           if (!stats.containsKey(typeLabel)) {
             stats[typeLabel] = {};
@@ -1048,36 +754,6 @@ class PdfService {
     );
   }
 
-  /// Seção completa do gráfico com título, gráfico e legenda
-  static pw.Widget _buildChartSection(
-    String team1Name,
-    String team2Name,
-    TeamStats stats1,
-    TeamStats stats2,
-  ) {
-    return pw.Container(
-      padding: const pw.EdgeInsets.all(20),
-      decoration: pw.BoxDecoration(
-        border: pw.Border.all(color: PdfColors.grey300, width: 1),
-        borderRadius: pw.BorderRadius.circular(8),
-      ),
-      child: pw.Column(
-        crossAxisAlignment: pw.CrossAxisAlignment.start,
-        children: [
-          pw.Text(
-            'GRÁFICO COMPARATIVO',
-            style: pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold),
-          ),
-          pw.SizedBox(height: 15),
-          // Altura fixa menor para caber junto com título
-          pw.SizedBox(height: 180, child: _buildChart(stats1, stats2)),
-          pw.SizedBox(height: 15),
-          _buildLegend(team1Name, team2Name),
-        ],
-      ),
-    );
-  }
-
   static pw.Widget _buildSetsBreakdown(
     List<SetData> sets,
     String team1,
@@ -1256,7 +932,7 @@ class PdfService {
       await file.writeAsBytes(await pdf.save());
       return file;
     } catch (e) {
-      print('Erro ao salvar PDF: $e');
+      debugPrint('Erro ao salvar PDF: $e');
       return null;
     }
   }
@@ -1266,7 +942,7 @@ class PdfService {
     try {
       await OpenFile.open(file.path);
     } catch (e) {
-      print('Erro ao abrir PDF: $e');
+      debugPrint('Erro ao abrir PDF: $e');
     }
   }
 }

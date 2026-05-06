@@ -39,5 +39,8 @@ flutter_icons:
 
 flutter:
   uses-material-design: true
+  # Apenas os assets usados em runtime (Image.asset). Os PNGs source para
+  # flutter_launcher_icons (app_icon_padded.png etc.) não precisam ir no bundle.
   assets:
-    - assets/
+    - assets/logo.png
+    - assets/logo_dark.png

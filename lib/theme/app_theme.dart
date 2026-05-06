@@ -52,15 +52,9 @@ class AppTheme {
     end: Alignment.bottomCenter,
   );
 
-  // --- ALIASES CONTEXTUAIS (compatibilidade) ---
-  // Esses getters mantém compatibilidade com código antigo, mas NÃO devem
-  // ser usados em novos widgets. Use AppThemeColors.of(context) em vez disso.
-  static const cardBackground = darkCardBackground;
-  static const surfaceLight = darkSurfaceLight;
-
   /// Retorna as cores corretas baseado no tema atual.
   /// Seguro para uso tanto em build() quanto em event handlers.
-  /// A reatividade é garantida pelo Consumer<ThemeProvider> no MaterialApp.
+  /// A reatividade é garantida pelo `Consumer<ThemeProvider>` no MaterialApp.
   static AppThemeColors of(BuildContext context) {
     final isDark = context.read<ThemeProvider>().isDarkMode;
     return isDark ? AppThemeColors.dark() : AppThemeColors.light();

@@ -287,7 +287,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
                 ),
               ),
               IconButton(
-                icon: const Icon(Icons.delete_outline, color: Colors.red),
+                icon: const Icon(Icons.delete_outline, color: AppTheme.error),
                 onPressed: () => _confirmDelete(report),
               ),
             ],
@@ -380,6 +380,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
 
   Future<void> _openPdf(String path) async {
     final exists = await ReportStorageService.fileExists(path);
+    if (!mounted) return;
     if (!exists) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -399,6 +400,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
 
   Future<void> _sharePdf(String path) async {
     final exists = await ReportStorageService.fileExists(path);
+    if (!mounted) return;
     if (!exists) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(

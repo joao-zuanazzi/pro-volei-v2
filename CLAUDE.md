@@ -64,7 +64,7 @@ lib/
 │   └── app_theme.dart           # ThemeData + AppThemeColors
 └── widgets/
     ├── action_button.dart       # GradientButton + CircleActionButton
-    ├── score_bar.dart           # ScoreBar + ScoreDisplay
+    ├── score_bar.dart           # ScoreDisplay (placar grande animado)
     ├── set_selector.dart        # Seletor visual de sets
     └── team_panel.dart          # Painel de registro de pontos
 ```

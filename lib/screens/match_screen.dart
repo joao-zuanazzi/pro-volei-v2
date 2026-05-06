@@ -134,51 +134,65 @@ class MatchScreen extends StatelessWidget {
                 ),
               );
             },
-            child: StreamBuilder(
-              stream: Stream.periodic(const Duration(seconds: 1)),
-              builder: (context, _) {
-                final game = context.read<GameService>();
-                final matchTime = game.matchDuration;
-                final isRunning = game.isTimerRunning;
-                final m = matchTime.inMinutes.toString().padLeft(2, '0');
-                final s = (matchTime.inSeconds % 60).toString().padLeft(2, '0');
-                return AnimatedContainer(
-                  duration: const Duration(milliseconds: 300),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 6,
-                  ),
-                  decoration: BoxDecoration(
-                    color: isRunning
-                        ? Colors.green.withValues(alpha: 0.2)
-                        : colors.surface,
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                      color: isRunning
-                          ? Colors.green.withValues(alpha: 0.5)
-                          : Colors.amber.withValues(alpha: 0.3),
-                      width: 1,
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        isRunning ? Icons.pause : Icons.play_arrow,
-                        color: isRunning ? Colors.greenAccent : Colors.amber,
-                        size: 16,
+            child: Consumer<GameService>(
+              builder: (context, game, _) {
+                // Stream periódico só ativo quando o cronômetro está rodando.
+                // Quando pausado, o tempo não muda, então não precisamos rebuild a cada segundo.
+                return StreamBuilder<void>(
+                  stream: game.isTimerRunning
+                      ? Stream.periodic(const Duration(seconds: 1))
+                      : null,
+                  builder: (context, _) {
+                    final matchTime = game.matchDuration;
+                    final isRunning = game.isTimerRunning;
+                    final m = matchTime.inMinutes.toString().padLeft(2, '0');
+                    final s = (matchTime.inSeconds % 60).toString().padLeft(
+                      2,
+                      '0',
+                    );
+                    return AnimatedContainer(
+                      duration: const Duration(milliseconds: 300),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
                       ),
-                      const SizedBox(width: 6),
-                      Text(
-                        '$m:$s',
-                        style: TextStyle(
-                          color: isRunning ? Colors.greenAccent : Colors.amber,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
+                      decoration: BoxDecoration(
+                        color: isRunning
+                            ? AppTheme.success.withValues(alpha: 0.18)
+                            : colors.surface,
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: isRunning
+                              ? AppTheme.success.withValues(alpha: 0.5)
+                              : AppTheme.warning.withValues(alpha: 0.4),
+                          width: 1,
                         ),
                       ),
-                    ],
-                  ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            isRunning ? Icons.pause : Icons.play_arrow,
+                            color: isRunning
+                                ? AppTheme.success
+                                : AppTheme.warning,
+                            size: 16,
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            '$m:$s',
+                            style: TextStyle(
+                              color: isRunning
+                                  ? AppTheme.success
+                                  : AppTheme.warning,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
                 );
               },
             ),
@@ -612,11 +626,13 @@ class MatchScreen extends StatelessWidget {
       matchName: game.matchName,
     );
 
+    if (!context.mounted) return;
     Navigator.pop(context);
 
     if (file != null) {
       // Salva no storage de relatórios
       await ReportStorageService.addSetReport(game.matchName, file.path);
+      if (!context.mounted) return;
       // Mostra diálogo de confirmação
       final shouldOpen = await showDialog<bool>(
         context: context,
@@ -645,7 +661,7 @@ class MatchScreen extends StatelessWidget {
               onPressed: () async {
                 Navigator.pop(context, false);
                 await Share.shareXFiles(
-                  [XFile(file!.path)],
+                  [XFile(file.path)],
                   subject: 'Relatório Set ${setData.setNumber}',
                 );
               },
@@ -696,12 +712,14 @@ class MatchScreen extends StatelessWidget {
       matchName: game.matchName,
     );
 
+    if (!context.mounted) return;
     Navigator.pop(context);
 
     if (file != null) {
       await ReportStorageService.addFinalReport(game.matchName, file.path);
       await GameService.clearSavedMatch();
 
+      if (!context.mounted) return;
       final shouldOpen = await showDialog<bool>(
         context: context,
         builder: (context) => AlertDialog(
@@ -732,7 +750,7 @@ class MatchScreen extends StatelessWidget {
               onPressed: () async {
                 Navigator.pop(context, false);
                 await Share.shareXFiles(
-                  [XFile(file!.path)],
+                  [XFile(file.path)],
                   subject: 'Relatório Final - ${game.matchName}',
                 );
               },
