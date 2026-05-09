@@ -1,3 +1,5 @@
+import 'match_stats_snapshot.dart';
+
 /// Modelo para armazenar informações de uma partida e seus relatórios
 class MatchReport {
   final String id;
@@ -5,6 +7,7 @@ class MatchReport {
   final DateTime createdAt;
   final List<String> setReportPaths;
   final String? finalReportPath;
+  final MatchStatsSnapshot? stats;
 
   const MatchReport({
     required this.id,
@@ -12,6 +15,7 @@ class MatchReport {
     required this.createdAt,
     this.setReportPaths = const [],
     this.finalReportPath,
+    this.stats,
   });
 
   /// Cria a partir de JSON
@@ -22,6 +26,9 @@ class MatchReport {
       createdAt: DateTime.parse(json['createdAt'] as String),
       setReportPaths: List<String>.from(json['setReportPaths'] ?? []),
       finalReportPath: json['finalReportPath'] as String?,
+      stats: json['stats'] != null
+          ? MatchStatsSnapshot.fromJson(json['stats'] as Map<String, dynamic>)
+          : null,
     );
   }
 
@@ -33,6 +40,7 @@ class MatchReport {
       'createdAt': createdAt.toIso8601String(),
       'setReportPaths': setReportPaths,
       'finalReportPath': finalReportPath,
+      if (stats != null) 'stats': stats!.toJson(),
     };
   }
 
@@ -43,6 +51,7 @@ class MatchReport {
     DateTime? createdAt,
     List<String>? setReportPaths,
     String? finalReportPath,
+    MatchStatsSnapshot? stats,
   }) {
     return MatchReport(
       id: id ?? this.id,
@@ -50,6 +59,7 @@ class MatchReport {
       createdAt: createdAt ?? this.createdAt,
       setReportPaths: setReportPaths ?? this.setReportPaths,
       finalReportPath: finalReportPath ?? this.finalReportPath,
+      stats: stats ?? this.stats,
     );
   }
 
@@ -61,6 +71,11 @@ class MatchReport {
   /// Define o relatório final
   MatchReport withFinalReport(String path) {
     return copyWith(finalReportPath: path);
+  }
+
+  /// Define o snapshot estatístico
+  MatchReport withStats(MatchStatsSnapshot snapshot) {
+    return copyWith(stats: snapshot);
   }
 
   /// Total de relatórios

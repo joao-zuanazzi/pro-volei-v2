@@ -256,12 +256,14 @@ class GameService extends ChangeNotifier {
     // Validação: tipo e detalhe são obrigatórios
     if (type == null || detail == null) return false;
 
-    // Se a equipe tem jogadores cadastrados, validar se jogador foi selecionado
-    // Exceto para erro do adversário, onde o jogador não é atribuído
-    final team = teamIndex == 0 ? _team1 : _team2;
-    if (type != PointType.opponentError &&
-        team.players.isNotEmpty &&
-        playerId == null) {
+    // Se a equipe alvo tem jogadores cadastrados, validar se jogador foi selecionado.
+    // Para opponentError, a equipe alvo é o ADVERSÁRIO (quem errou); para os
+    // demais tipos, é o próprio time que marcou.
+    final isOpponentError = type == PointType.opponentError;
+    final targetTeam = isOpponentError
+        ? (teamIndex == 0 ? _team2 : _team1)
+        : (teamIndex == 0 ? _team1 : _team2);
+    if (targetTeam.players.isNotEmpty && playerId == null) {
       return false;
     }
 

@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 import '../models/match_report.dart';
+import '../models/match_stats_snapshot.dart';
 
 /// Serviço para gerenciar armazenamento de relatórios
 class ReportStorageService {
@@ -32,9 +33,17 @@ class ReportStorageService {
   }
 
   /// Registra o relatório final e salva a partida
-  static Future<void> addFinalReport(String matchName, String filePath) async {
+  static Future<void> addFinalReport(
+    String matchName,
+    String filePath, {
+    MatchStatsSnapshot? stats,
+  }) async {
     final match = await getCurrentMatch(matchName);
-    _currentMatch = match.withFinalReport(filePath);
+    var updated = match.withFinalReport(filePath);
+    if (stats != null) {
+      updated = updated.withStats(stats);
+    }
+    _currentMatch = updated;
 
     // Salva a partida completa
     await saveMatch(_currentMatch!);

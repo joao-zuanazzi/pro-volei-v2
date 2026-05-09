@@ -25,12 +25,16 @@ O tema claro foi implementado mas ainda NÃO foi testado completamente no celula
 - Toggle na home screen
 - Todas as telas e widgets com cores dinâmicas
 
-### Fase 4 — Dashboard de Estatísticas
-- [ ] Tela de dashboard com gráficos
-- [ ] Estatísticas por equipe (total de pontos por tipo)
-- [ ] Estatísticas por jogador (quem mais pontua, quem mais erra)
-- [ ] Comparativo entre equipes
-- [ ] Gráficos visuais (barras, pizza) — considerar pacote `fl_chart`
+### Fase 4 — Dashboard de Estatísticas ✅
+- [x] Tela de dashboard com gráficos (`DashboardScreen`)
+- [x] Estatísticas por equipe (total de pontos por tipo)
+- [x] Comparativo histórico entre partidas (evolução por equipe)
+- [x] Gráficos visuais (linha + barras com `fl_chart`)
+- [x] Snapshot estatístico persistido junto do `MatchReport` (`MatchStatsSnapshot`)
+- [x] Top jogadores por pontos (saque + ataque + bloqueio agregados)
+- [x] Desempenho por adversário (V/E/D, pontos pró/contra)
+- [x] "Quem mais erra" — fluxo de seleção de jogador adversário restaurado no `TeamPanel` (estava desativado), `PlayerStatsSnapshot` ganhou `errosCometidos`
+- [x] Sparklines empilhados com escala individual, linha de média, contexto "vs partida anterior" e aviso de amostra pequena (heurísticas de Nielsen)
 
 ### Fase 5 — Melhorias de UX
 - [ ] Animações mais suaves nas transições de tela

@@ -5,6 +5,7 @@ import '../models/team.dart';
 import '../services/storage_service.dart';
 import '../services/theme_provider.dart';
 import '../theme/app_theme.dart';
+import 'dashboard_screen.dart';
 import 'match_screen.dart';
 import 'reports_screen.dart';
 import 'team_list_screen.dart';
@@ -51,6 +52,8 @@ class HomeScreen extends StatelessWidget {
                               _buildManageTeamsButton(context),
                               const SizedBox(height: 8),
                               _buildReportsButton(context),
+                              const SizedBox(height: 8),
+                              _buildDashboardButton(context),
                               const SizedBox(height: 16),
                               _buildVersion(context),
                             ],
@@ -77,6 +80,8 @@ class HomeScreen extends StatelessWidget {
                         _buildManageTeamsButton(context),
                         const SizedBox(height: 12),
                         _buildReportsButton(context),
+                        const SizedBox(height: 12),
+                        _buildDashboardButton(context),
                         const SizedBox(height: 32),
                         _buildVersion(context),
                       ],
@@ -218,6 +223,23 @@ class HomeScreen extends StatelessWidget {
       icon: Icon(Icons.folder_open, color: colors.textSecondary),
       label: Text(
         'VER RELATÓRIOS',
+        style: TextStyle(color: colors.textSecondary, fontSize: 16),
+      ),
+    );
+  }
+
+  Widget _buildDashboardButton(BuildContext context) {
+    final colors = AppTheme.of(context);
+    return TextButton.icon(
+      onPressed: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const DashboardScreen()),
+        );
+      },
+      icon: Icon(Icons.bar_chart, color: colors.textSecondary),
+      label: Text(
+        'DASHBOARD',
         style: TextStyle(color: colors.textSecondary, fontSize: 16),
       ),
     );

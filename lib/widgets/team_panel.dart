@@ -58,8 +58,7 @@ class TeamPanel extends StatelessWidget {
             const SizedBox(height: 16),
             _buildDetailSelector(colors),
           ],
-          if (selectedType != null &&
-              selectedType != PointType.opponentError) ...[
+          if (selectedType != null) ...[
             const SizedBox(height: 16),
             _buildPlayerSelector(colors),
           ],
@@ -276,17 +275,19 @@ class TeamPanel extends StatelessWidget {
   }
 
   Widget _buildActions(BuildContext context) {
-    // Só habilita salvar se tipo e detalhe estiverem selecionados
-    // Se houver jogadores target, um jogador deve ser selecionado
+    // Só habilita salvar se tipo e detalhe estiverem selecionados.
+    // O seletor de jogador alvo depende do tipo:
+    // - opponentError: jogador do time adversário (quem ERROU)
+    // - demais: jogador do próprio time (quem MARCOU)
+    // Se a equipe alvo tem jogadores cadastrados, um deles deve ser selecionado.
     final targetPlayers = selectedType == PointType.opponentError
         ? opponentPlayers
         : players;
 
-    final isOpponentError = selectedType == PointType.opponentError;
     final canSave =
         selectedType != null &&
         selectedDetail != null &&
-        (isOpponentError || targetPlayers.isEmpty || selectedPlayerId != null);
+        (targetPlayers.isEmpty || selectedPlayerId != null);
 
     return Row(
       children: [

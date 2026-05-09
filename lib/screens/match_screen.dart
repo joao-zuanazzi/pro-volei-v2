@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
+import '../models/match_stats_snapshot.dart';
 import '../services/game_service.dart';
 import '../services/pdf_service.dart';
 import '../services/report_storage_service.dart';
@@ -716,7 +717,17 @@ class MatchScreen extends StatelessWidget {
     Navigator.pop(context);
 
     if (file != null) {
-      await ReportStorageService.addFinalReport(game.matchName, file.path);
+      final snapshot = MatchStatsSnapshot.fromMatch(
+        sets: game.sets,
+        team1: game.team1,
+        team2: game.team2,
+        matchDuration: game.matchDuration,
+      );
+      await ReportStorageService.addFinalReport(
+        game.matchName,
+        file.path,
+        stats: snapshot,
+      );
       await GameService.clearSavedMatch();
 
       if (!context.mounted) return;
