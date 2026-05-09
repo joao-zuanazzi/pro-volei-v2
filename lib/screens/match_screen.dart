@@ -66,13 +66,15 @@ class MatchScreen extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Row(
         children: [
-          // Botão voltar - SizedBox com largura fixa para balancear com o timer
+          // Botão de sair (fecha a partida) — usa ícone de fechar (X) em vez
+          // de seta de voltar porque o tap abre um diálogo modal, não navega.
           SizedBox(
-            width: 80, // Mesma largura aproximada do timer
+            width: 80,
             child: Align(
               alignment: Alignment.centerLeft,
               child: IconButton(
-                icon: Icon(Icons.arrow_back_ios, color: colors.textSecondary),
+                icon: Icon(Icons.close, color: colors.textSecondary),
+                tooltip: 'Sair da partida',
                 onPressed: () => _showExitDialog(context),
               ),
             ),
@@ -123,18 +125,9 @@ class MatchScreen extends StatelessWidget {
               ),
             ),
           ),
-          // Timer à direita - Toque para iniciar/pausar, long press gera pontos de teste
+          // Timer à direita - Toque para iniciar/pausar.
           GestureDetector(
             onTap: () => context.read<GameService>().toggleTimer(),
-            onLongPress: () {
-              context.read<GameService>().generateRandomPoints(count: 15);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('🧪 +15 pontos aleatórios gerados'),
-                  duration: Duration(seconds: 1),
-                ),
-              );
-            },
             child: Consumer<GameService>(
               builder: (context, game, _) {
                 // Stream periódico só ativo quando o cronômetro está rodando.
@@ -382,21 +375,16 @@ class MatchScreen extends StatelessWidget {
   }
 
   Widget _buildActionButtons(BuildContext context) {
+    // Hierarquia visual:
+    // - "Finalizar set": ação frequente (a cada 25 pts), peso secundário (azul).
+    // - "Finalizar jogo": ação terminal de maior consequência, peso primário (gold,
+    //   maior, com destaque). Sair virou ícone de fechar no header.
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       child: Row(
         children: [
           Expanded(
-            child: GradientButton(
-              text: 'SAIR',
-              icon: Icons.exit_to_app,
-              backgroundColor: AppTheme.error,
-              gradient: null,
-              onPressed: () => _showExitDialog(context),
-            ),
-          ),
-          const SizedBox(width: 8),
-          Expanded(
+            flex: 2,
             child: GradientButton(
               text: 'FINALIZAR SET',
               icon: Icons.flag,
@@ -404,8 +392,9 @@ class MatchScreen extends StatelessWidget {
               onPressed: () => _finishSet(context),
             ),
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: 10),
           Expanded(
+            flex: 3,
             child: GradientButton(
               text: 'FINALIZAR JOGO',
               icon: Icons.emoji_events,

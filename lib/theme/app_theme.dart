@@ -98,7 +98,6 @@ class AppTheme {
         elevation: 0,
         centerTitle: true,
         titleTextStyle: const TextStyle(
-          fontFamily: 'Poppins',
           fontSize: 20,
           fontWeight: FontWeight.w600,
           color: Colors.white,
@@ -135,47 +134,39 @@ class AppTheme {
           color: isDark ? Colors.white : const Color(0xFF1A1A2E),
         ),
         displayMedium: TextStyle(
-          fontFamily: 'Poppins',
           fontSize: 36,
           fontWeight: FontWeight.bold,
           color: isDark ? Colors.white : const Color(0xFF1A1A2E),
         ),
         headlineLarge: TextStyle(
-          fontFamily: 'Poppins',
           fontSize: 28,
           fontWeight: FontWeight.w600,
           color: isDark ? Colors.white : const Color(0xFF1A1A2E),
         ),
         headlineMedium: TextStyle(
-          fontFamily: 'Poppins',
           fontSize: 24,
           fontWeight: FontWeight.w600,
           color: isDark ? Colors.white : const Color(0xFF1A1A2E),
         ),
         titleLarge: TextStyle(
-          fontFamily: 'Poppins',
           fontSize: 20,
           fontWeight: FontWeight.w500,
           color: isDark ? Colors.white : const Color(0xFF1A1A2E),
         ),
         titleMedium: TextStyle(
-          fontFamily: 'Poppins',
           fontSize: 16,
           fontWeight: FontWeight.w500,
           color: isDark ? Colors.white : const Color(0xFF1A1A2E),
         ),
         bodyLarge: TextStyle(
-          fontFamily: 'Poppins',
           fontSize: 16,
           color: isDark ? Colors.white70 : const Color(0xFF5A5A7A),
         ),
         bodyMedium: TextStyle(
-          fontFamily: 'Poppins',
           fontSize: 14,
           color: isDark ? Colors.white70 : const Color(0xFF5A5A7A),
         ),
         labelLarge: TextStyle(
-          fontFamily: 'Poppins',
           fontSize: 14,
           fontWeight: FontWeight.w600,
           color: isDark ? Colors.white : const Color(0xFF1A1A2E),
@@ -185,7 +176,6 @@ class AppTheme {
       // Dropdown
       dropdownMenuTheme: DropdownMenuThemeData(
         textStyle: TextStyle(
-          fontFamily: 'Poppins',
           fontSize: 14,
           color: isDark ? Colors.white : const Color(0xFF1A1A2E),
         ),
