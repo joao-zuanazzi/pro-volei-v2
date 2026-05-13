@@ -258,7 +258,7 @@ class AppThemeColors {
       surface: AppTheme.lightSurfaceLight,
       text: Color(0xFF1A1A2E),
       textSecondary: Color(0xFF5A5A7A),
-      textTertiary: Color(0xFF7A7A94),
+      textTertiary: Color(0xFF5C5C75),
       textHint: Color(0xFF9A9AB0),
       border: Color(0xFFE1E5EA),
       dialogBackground: Colors.white,
