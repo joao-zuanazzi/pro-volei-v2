@@ -87,47 +87,50 @@ class MatchScreen extends StatelessWidget {
           ),
           // Centro: Título + nome da partida (expansível)
           Expanded(
-            child: GestureDetector(
-              onTap: () => _showEditMatchNameDialog(context),
-              child: Consumer<GameService>(
-                builder: (context, game, _) {
-                  return Column(
-                    children: [
-                      ShaderMask(
-                        shaderCallback: (bounds) =>
-                            AppTheme.goldGradient.createShader(bounds),
-                        child: const Text(
-                          'PRÓ-VÔLEI SPY',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 2,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            game.matchName,
+            child: Tooltip(
+              message: 'Editar nome da partida',
+              child: GestureDetector(
+                onTap: () => _showEditMatchNameDialog(context),
+                child: Consumer<GameService>(
+                  builder: (context, game, _) {
+                    return Column(
+                      children: [
+                        ShaderMask(
+                          shaderCallback: (bounds) =>
+                              AppTheme.goldGradient.createShader(bounds),
+                          child: const Text(
+                            'PRÓ-VÔLEI SPY',
                             style: TextStyle(
-                              color: colors.textTertiary,
-                              fontSize: 12,
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 2,
                             ),
                           ),
-                          const SizedBox(width: 4),
-                          Icon(
-                            Icons.edit,
-                            color: colors.textHint,
-                            size: 12,
-                          ),
-                        ],
-                      ),
-                    ],
-                  );
-                },
+                        ),
+                        const SizedBox(height: 4),
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              game.matchName,
+                              style: TextStyle(
+                                color: colors.textTertiary,
+                                fontSize: 12,
+                              ),
+                            ),
+                            const SizedBox(width: 4),
+                            Icon(
+                              Icons.edit,
+                              color: colors.textHint,
+                              size: 16,
+                            ),
+                          ],
+                        ),
+                      ],
+                    );
+                  },
+                ),
               ),
             ),
           ),
