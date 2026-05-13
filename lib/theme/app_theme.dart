@@ -24,7 +24,7 @@ class AppTheme {
 
   // --- Cores do tema CLARO ---
   static const lightBackground = Color(0xFFF5F7FA);
-  static const lightCardBackground = Color(0xFFFFFFFF);
+  static const lightCardBackground = Color(0xFFFAFBFC);
   static const lightSurfaceLight = Color(0xFFE8ECF1);
 
   // Gradientes
@@ -260,7 +260,7 @@ class AppThemeColors {
       textSecondary: Color(0xFF5A5A7A),
       textTertiary: Color(0xFF7A7A94),
       textHint: Color(0xFF9A9AB0),
-      border: Color(0xFFD0D5DD),
+      border: Color(0xFFE1E5EA),
       dialogBackground: Colors.white,
       cancelButton: Color(0xFF5A5A7A),
       dropdownColor: Color(0xFFE8ECF1),
