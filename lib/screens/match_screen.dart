@@ -19,40 +19,46 @@ class MatchScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = AppTheme.of(context);
 
-    return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(gradient: colors.backgroundGradient),
-        child: SafeArea(
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              // Se a altura for suficiente, usa layout com Expanded
-              if (constraints.maxHeight >= 650) {
-                return Column(
-                  children: [
-                    _buildHeader(context),
-                    _buildScoreDisplay(context),
-                    Expanded(child: _buildTeamPanels(context)),
-                    _buildSetSelector(context),
-                    _buildActionButtons(context),
-                  ],
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) _showExitDialog(context);
+      },
+      child: Scaffold(
+        body: Container(
+          decoration: BoxDecoration(gradient: colors.backgroundGradient),
+          child: SafeArea(
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                // Se a altura for suficiente, usa layout com Expanded
+                if (constraints.maxHeight >= 650) {
+                  return Column(
+                    children: [
+                      _buildHeader(context),
+                      _buildScoreDisplay(context),
+                      Expanded(child: _buildTeamPanels(context)),
+                      _buildSetSelector(context),
+                      _buildActionButtons(context),
+                    ],
+                  );
+                }
+                // Se a altura for pequena (paisagem), usa scroll compacto
+                return SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      _buildHeader(context),
+                      _buildScoreDisplay(context, compact: true),
+                      SizedBox(
+                        height: constraints.maxHeight * 0.55,
+                        child: _buildTeamPanels(context),
+                      ),
+                      _buildSetSelector(context),
+                      _buildActionButtons(context),
+                    ],
+                  ),
                 );
-              }
-              // Se a altura for pequena (paisagem), usa scroll compacto
-              return SingleChildScrollView(
-                child: Column(
-                  children: [
-                    _buildHeader(context),
-                    _buildScoreDisplay(context, compact: true),
-                    SizedBox(
-                      height: constraints.maxHeight * 0.55,
-                      child: _buildTeamPanels(context),
-                    ),
-                    _buildSetSelector(context),
-                    _buildActionButtons(context),
-                  ],
-                ),
-              );
-            },
+              },
+            ),
           ),
         ),
       ),
@@ -384,7 +390,6 @@ class MatchScreen extends StatelessWidget {
       child: Row(
         children: [
           Expanded(
-            flex: 2,
             child: GradientButton(
               text: 'FINALIZAR SET',
               icon: Icons.flag,
@@ -394,7 +399,6 @@ class MatchScreen extends StatelessWidget {
           ),
           const SizedBox(width: 10),
           Expanded(
-            flex: 3,
             child: GradientButton(
               text: 'FINALIZAR JOGO',
               icon: Icons.emoji_events,

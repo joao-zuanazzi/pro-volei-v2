@@ -90,28 +90,45 @@ class ScoreDisplay extends StatelessWidget {
   }
 
   Widget _buildVs(AppThemeColors colors) {
-    return GestureDetector(
-      onTap: onSwapTeams,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        decoration: BoxDecoration(
-          color: colors.surface,
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              'VS',
-              style: TextStyle(
-                color: colors.textTertiary,
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
+    return Tooltip(
+      message: 'Trocar lados',
+      child: GestureDetector(
+        onTap: onSwapTeams,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          decoration: BoxDecoration(
+            color: colors.surface,
+            borderRadius: BorderRadius.circular(10),
+            border: onSwapTeams != null
+                ? Border.all(color: colors.border)
+                : null,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'VS',
+                style: TextStyle(
+                  color: colors.textTertiary,
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            ),
-            if (onSwapTeams != null)
-              Icon(Icons.swap_horiz, color: colors.textHint, size: 14),
-          ],
+              if (onSwapTeams != null) ...[
+                const SizedBox(height: 4),
+                Icon(Icons.swap_horiz, color: AppTheme.primaryGold, size: 20),
+                const SizedBox(height: 2),
+                Text(
+                  'Trocar',
+                  style: TextStyle(
+                    color: colors.textHint,
+                    fontSize: 9,
+                    letterSpacing: 0.3,
+                  ),
+                ),
+              ],
+            ],
+          ),
         ),
       ),
     );
