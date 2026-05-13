@@ -371,11 +371,14 @@ class MatchScreen extends StatelessWidget {
     return Consumer<GameService>(
       builder: (context, game, _) {
         final setWinners = game.sets.map((s) => s.winnerTeamIndex).toList();
+        // Mostra sets finalizados + set atual + 1 próximo, no máximo 5
+        final visibleSets = (game.currentSetIndex + 2).clamp(2, 5);
 
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           child: SetSelector(
             currentSet: game.currentSetIndex + 1,
+            totalSets: visibleSets,
             setWinners: setWinners,
             onSetSelected: (set) => game.selectSet(set - 1),
           ),
