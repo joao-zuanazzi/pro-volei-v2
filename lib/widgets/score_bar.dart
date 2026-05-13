@@ -68,23 +68,7 @@ class ScoreDisplay extends StatelessWidget {
           overflow: TextOverflow.ellipsis,
         ),
         const SizedBox(height: 8),
-        TweenAnimationBuilder<int>(
-          tween: IntTween(begin: 0, end: score),
-          duration: const Duration(milliseconds: 500),
-          builder: (context, value, child) {
-            return Text(
-              '$value',
-              style: TextStyle(
-                color: colors.text,
-                fontSize: 56,
-                fontWeight: FontWeight.bold,
-                shadows: [
-                  Shadow(color: color.withValues(alpha: 0.5), blurRadius: 20),
-                ],
-              ),
-            );
-          },
-        ),
+        _AnimatedScore(score: score, color: color, colors: colors),
       ],
     );
   }
@@ -131,6 +115,63 @@ class ScoreDisplay extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _AnimatedScore extends StatefulWidget {
+  final int score;
+  final Color color;
+  final AppThemeColors colors;
+
+  const _AnimatedScore({
+    required this.score,
+    required this.color,
+    required this.colors,
+  });
+
+  @override
+  State<_AnimatedScore> createState() => _AnimatedScoreState();
+}
+
+class _AnimatedScoreState extends State<_AnimatedScore> {
+  late int _prevScore;
+
+  @override
+  void initState() {
+    super.initState();
+    _prevScore = widget.score;
+  }
+
+  @override
+  void didUpdateWidget(_AnimatedScore old) {
+    super.didUpdateWidget(old);
+    if (old.score != widget.score) {
+      _prevScore = old.score;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return TweenAnimationBuilder<int>(
+      tween: IntTween(begin: _prevScore, end: widget.score),
+      duration: const Duration(milliseconds: 300),
+      builder: (context, value, _) {
+        return Text(
+          '$value',
+          style: TextStyle(
+            color: widget.colors.text,
+            fontSize: 56,
+            fontWeight: FontWeight.bold,
+            shadows: [
+              Shadow(
+                color: widget.color.withValues(alpha: 0.5),
+                blurRadius: 20,
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }
