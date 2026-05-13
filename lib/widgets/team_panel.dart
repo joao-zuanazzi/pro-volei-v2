@@ -313,8 +313,8 @@ class TeamPanel extends StatelessWidget {
         Expanded(
           child: ElevatedButton.icon(
             onPressed: onDelete,
-            icon: const Icon(Icons.remove, size: 20),
-            label: const Text('EXCLUIR'),
+            icon: const Icon(Icons.undo, size: 20),
+            label: const Text('DESFAZER'),
             style: ElevatedButton.styleFrom(
               backgroundColor: AppTheme.error,
               foregroundColor: Colors.white,
