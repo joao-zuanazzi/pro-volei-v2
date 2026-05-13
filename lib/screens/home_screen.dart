@@ -40,23 +40,26 @@ class HomeScreen extends StatelessWidget {
                       child: SingleChildScrollView(
                         child: Padding(
                           padding: const EdgeInsets.all(24),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              _buildLogo(context, logoHeight),
-                              const SizedBox(height: 12),
-                              _buildSubtitle(context),
-                              const SizedBox(height: 20),
-                              _buildStartButton(context),
-                              const SizedBox(height: 12),
-                              _buildManageTeamsButton(context),
-                              const SizedBox(height: 8),
-                              _buildReportsButton(context),
-                              const SizedBox(height: 8),
-                              _buildDashboardButton(context),
-                              const SizedBox(height: 16),
-                              _buildVersion(context),
-                            ],
+                          child: ConstrainedBox(
+                            constraints: const BoxConstraints(maxWidth: 480),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                _buildLogo(context, logoHeight),
+                                const SizedBox(height: 12),
+                                _buildSubtitle(context),
+                                const SizedBox(height: 20),
+                                _buildStartButton(context),
+                                const SizedBox(height: 12),
+                                _buildManageTeamsButton(context),
+                                const SizedBox(height: 8),
+                                _buildReportsButton(context),
+                                const SizedBox(height: 8),
+                                _buildDashboardButton(context),
+                                const SizedBox(height: 16),
+                                _buildVersion(context),
+                              ],
+                            ),
                           ),
                         ),
                       ),
@@ -194,53 +197,108 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildManageTeamsButton(BuildContext context) {
+  Widget _buildNavCard(
+    BuildContext context, {
+    required IconData icon,
+    required Color iconColor,
+    required String label,
+    required String description,
+    required VoidCallback onTap,
+  }) {
     final colors = AppTheme.of(context);
-    return TextButton.icon(
-      onPressed: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const TeamListScreen()),
-        );
-      },
-      icon: Icon(Icons.people, color: colors.textSecondary),
-      label: Text(
-        'GERENCIAR EQUIPES',
-        style: TextStyle(color: colors.textSecondary, fontSize: 16),
+    return Material(
+      color: colors.card,
+      borderRadius: BorderRadius.circular(16),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: colors.border),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: iconColor.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(icon, color: iconColor, size: 24),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      label,
+                      style: TextStyle(
+                        color: colors.text,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      description,
+                      style: TextStyle(
+                        color: colors.textTertiary,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(Icons.chevron_right, color: colors.textHint, size: 20),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildManageTeamsButton(BuildContext context) {
+    return _buildNavCard(
+      context,
+      icon: Icons.people,
+      iconColor: AppTheme.team1Color,
+      label: 'Gerenciar Equipes',
+      description: 'Criar, editar e organizar equipes',
+      onTap: () => Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const TeamListScreen()),
       ),
     );
   }
 
   Widget _buildReportsButton(BuildContext context) {
-    final colors = AppTheme.of(context);
-    return TextButton.icon(
-      onPressed: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const ReportsScreen()),
-        );
-      },
-      icon: Icon(Icons.folder_open, color: colors.textSecondary),
-      label: Text(
-        'VER RELATÓRIOS',
-        style: TextStyle(color: colors.textSecondary, fontSize: 16),
+    return _buildNavCard(
+      context,
+      icon: Icons.folder_open,
+      iconColor: AppTheme.primaryGold,
+      label: 'Relatórios',
+      description: 'Histórico e PDF das partidas',
+      onTap: () => Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const ReportsScreen()),
       ),
     );
   }
 
   Widget _buildDashboardButton(BuildContext context) {
-    final colors = AppTheme.of(context);
-    return TextButton.icon(
-      onPressed: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const DashboardScreen()),
-        );
-      },
-      icon: Icon(Icons.bar_chart, color: colors.textSecondary),
-      label: Text(
-        'DASHBOARD',
-        style: TextStyle(color: colors.textSecondary, fontSize: 16),
+    return _buildNavCard(
+      context,
+      icon: Icons.bar_chart,
+      iconColor: AppTheme.success,
+      label: 'Dashboard',
+      description: 'Estatísticas e evolução das equipes',
+      onTap: () => Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const DashboardScreen()),
       ),
     );
   }
