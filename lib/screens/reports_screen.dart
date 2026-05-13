@@ -61,6 +61,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
         children: [
           IconButton(
             icon: Icon(Icons.arrow_back_ios, color: colors.textSecondary),
+            tooltip: 'Voltar',
             onPressed: () => Navigator.pop(context),
           ),
           const SizedBox(width: 8),
@@ -80,6 +81,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
           const Spacer(),
           IconButton(
             icon: Icon(Icons.refresh, color: colors.textSecondary),
+            tooltip: 'Atualizar relatórios',
             onPressed: _loadReports,
           ),
         ],
@@ -288,6 +290,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
               ),
               IconButton(
                 icon: const Icon(Icons.delete_outline, color: AppTheme.error),
+                tooltip: 'Excluir relatório',
                 onPressed: () => _confirmDelete(report),
               ),
             ],
@@ -364,6 +367,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
           children: [
             IconButton(
               icon: Icon(Icons.share, color: colors.textHint, size: 20),
+              tooltip: 'Compartilhar PDF',
               onPressed: () => _sharePdf(path),
             ),
             Icon(

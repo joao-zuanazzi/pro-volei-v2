@@ -110,6 +110,7 @@ class TeamListScreen extends StatelessWidget {
                         children: [
                           IconButton(
                             icon: const Icon(Icons.delete_outline, color: AppTheme.error, size: 20),
+                            tooltip: 'Excluir equipe',
                             onPressed: () async {
                               final confirm = await _showDeleteDialog(context, team.name);
                               if (confirm == true) storage.deleteTeam(team.id);

@@ -106,6 +106,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         children: [
           IconButton(
             icon: Icon(Icons.arrow_back_ios, color: colors.textSecondary),
+            tooltip: 'Voltar',
             onPressed: () => Navigator.pop(context),
           ),
           const SizedBox(width: 8),
@@ -125,6 +126,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           const Spacer(),
           IconButton(
             icon: Icon(Icons.refresh, color: colors.textSecondary),
+            tooltip: 'Atualizar dashboard',
             onPressed: _loadReports,
           ),
         ],
