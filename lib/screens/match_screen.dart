@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show HapticFeedback;
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 import '../models/match_stats_snapshot.dart';
@@ -446,7 +447,8 @@ class MatchScreen extends StatelessWidget {
       return;
     }
 
-    game.addPoint(teamIndex);
+    final success = game.addPoint(teamIndex);
+    if (success) HapticFeedback.lightImpact();
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
