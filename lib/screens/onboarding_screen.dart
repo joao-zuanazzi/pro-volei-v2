@@ -110,6 +110,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isLandscape =
+        MediaQuery.of(context).orientation == Orientation.landscape;
     return PopScope(
       canPop: false,
       child: Scaffold(
@@ -131,7 +133,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 _buildDots(),
                 const SizedBox(height: 16),
                 _buildButton(),
-                const SizedBox(height: 32),
+                SizedBox(height: isLandscape ? 8 : 32),
               ],
             ),
           ),
@@ -165,6 +167,67 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   Widget _buildSlide(_OnboardingPage page) {
     final colors = AppTheme.of(context);
+    final isLandscape =
+        MediaQuery.of(context).orientation == Orientation.landscape;
+
+    if (isLandscape) {
+      return Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 560),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  width: 96,
+                  height: 96,
+                  decoration: BoxDecoration(
+                    color: page.iconColor.withValues(alpha: 0.12),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(page.icon, size: 48, color: page.iconColor),
+                ),
+                const SizedBox(width: 28),
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        ShaderMask(
+                          shaderCallback: (bounds) =>
+                              AppTheme.goldGradient.createShader(bounds),
+                          child: Text(
+                            page.title,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        Text(
+                          page.body,
+                          style: TextStyle(
+                            color: colors.textSecondary,
+                            fontSize: 13,
+                            height: 1.55,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Layout portrait
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 32),
       child: Column(
@@ -210,8 +273,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   Widget _buildDots() {
     final colors = AppTheme.of(context);
+    final isLandscape =
+        MediaQuery.of(context).orientation == Orientation.landscape;
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 16),
+      padding: EdgeInsets.symmetric(vertical: isLandscape ? 6 : 16),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: List.generate(_pages.length, (i) {
@@ -235,13 +300,18 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     final isLast = _currentPage == _pages.length - 1;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 32),
-      child: SizedBox(
-        width: double.infinity,
-        child: GradientButton(
-          text: isLast ? 'COMEÇAR!' : 'PRÓXIMO',
-          icon: isLast ? Icons.check : Icons.arrow_forward,
-          gradient: AppTheme.primaryGradient,
-          onPressed: _next,
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 400),
+          child: SizedBox(
+            width: double.infinity,
+            child: GradientButton(
+              text: isLast ? 'COMEÇAR!' : 'PRÓXIMO',
+              icon: isLast ? Icons.check : Icons.arrow_forward,
+              gradient: AppTheme.primaryGradient,
+              onPressed: _next,
+            ),
+          ),
         ),
       ),
     );

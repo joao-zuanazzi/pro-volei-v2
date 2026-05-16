@@ -117,25 +117,37 @@ class _CoachMarkOverlayState extends State<CoachMarkOverlay> {
     Size size,
     bool isLast,
   ) {
-    const pad = 16.0;
     const gap = 12.0;
-    final spaceBelow = size.height - rect.bottom;
-    final showBelow = spaceBelow >= rect.top;
+    const safeMargin = 8.0;
+
+    final cardWidth = (size.width - 32).clamp(0.0, 480.0);
+    final left = (size.width - cardWidth) / 2;
+
+    final spaceBelow = size.height - rect.bottom - gap - safeMargin;
+    final spaceAbove = rect.top - gap - safeMargin;
+    final showBelow = spaceBelow >= spaceAbove;
+
+    final maxHeight =
+        (showBelow ? spaceBelow : spaceAbove).clamp(120.0, double.infinity);
 
     return Positioned(
-      left: pad,
-      width: size.width - pad * 2,
-      top: showBelow ? rect.bottom + gap : null,
-      bottom: showBelow ? null : size.height - rect.top + gap,
-      child: _buildCard(step, size, isLast),
+      left: left,
+      width: cardWidth,
+      top: showBelow ? rect.bottom + gap : safeMargin,
+      child: ConstrainedBox(
+        constraints: BoxConstraints(maxHeight: maxHeight),
+        child: SingleChildScrollView(child: _buildCard(step, size, isLast)),
+      ),
     );
   }
 
   Widget _buildCard(CoachMarkStep step, Size size, bool isLast) {
     final colors = AppTheme.of(context);
+    final isLandscape =
+        MediaQuery.of(context).orientation == Orientation.landscape;
 
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: EdgeInsets.all(isLandscape ? 14 : 20),
       decoration: BoxDecoration(
         color: colors.card,
         borderRadius: BorderRadius.circular(20),
