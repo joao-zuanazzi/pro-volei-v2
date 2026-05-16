@@ -133,7 +133,8 @@ class _CoachMarkOverlayState extends State<CoachMarkOverlay> {
     return Positioned(
       left: left,
       width: cardWidth,
-      top: showBelow ? rect.bottom + gap : safeMargin,
+      top: showBelow ? rect.bottom + gap : null,
+      bottom: showBelow ? null : size.height - rect.top + gap,
       child: ConstrainedBox(
         constraints: BoxConstraints(maxHeight: maxHeight),
         child: SingleChildScrollView(child: _buildCard(step, size, isLast)),
