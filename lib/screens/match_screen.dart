@@ -27,6 +27,7 @@ class _MatchScreenState extends State<MatchScreen> {
   final _teamPanelsKey = GlobalKey();
   final _setSelectorKey = GlobalKey();
   final _footerKey = GlobalKey();
+  bool _matchFinished = false;
 
   @override
   void initState() {
@@ -77,7 +78,11 @@ class _MatchScreenState extends State<MatchScreen> {
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, _) {
-        if (!didPop) _showExitDialog(context);
+        if (!didPop) {
+          _matchFinished
+              ? _showFinishedExitDialog(context)
+              : _showExitDialog(context);
+        }
       },
       child: Scaffold(
         body: Container(
@@ -144,7 +149,9 @@ class _MatchScreenState extends State<MatchScreen> {
               child: IconButton(
                 icon: Icon(Icons.close, color: colors.textSecondary),
                 tooltip: 'Sair da partida',
-                onPressed: () => _showExitDialog(context),
+                onPressed: () => _matchFinished
+                    ? _showFinishedExitDialog(context)
+                    : _showExitDialog(context),
               ),
             ),
           ),
@@ -621,6 +628,35 @@ class _MatchScreenState extends State<MatchScreen> {
     );
   }
 
+  void _showFinishedExitDialog(BuildContext context) {
+    final colors = AppTheme.read(context);
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        backgroundColor: colors.dialogBackground,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Text('Sair da Partida?', style: TextStyle(color: colors.text)),
+        content: Text(
+          'A partida foi finalizada. Deseja voltar à tela inicial?',
+          style: TextStyle(color: colors.textSecondary),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: Text('NÃO', style: TextStyle(color: colors.cancelButton)),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(dialogContext);
+              Navigator.pop(context);
+            },
+            child: const Text('SIM'),
+          ),
+        ],
+      ),
+    );
+  }
+
   void _showExitDialog(BuildContext context) {
     final colors = AppTheme.read(context);
 
@@ -792,6 +828,7 @@ class _MatchScreenState extends State<MatchScreen> {
         stats: snapshot,
       );
       await GameService.clearSavedMatch();
+      if (mounted) setState(() => _matchFinished = true);
 
       if (!context.mounted) return;
       final shouldOpen = await showDialog<bool>(
