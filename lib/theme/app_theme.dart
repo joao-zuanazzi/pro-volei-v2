@@ -14,7 +14,7 @@ class AppTheme {
 
   // Cores de feedback (fixas)
   static const success = Color(0xFF4CAF50);
-  static const error = Color(0xFFE53935);
+  static const error = Color(0xFFD32F2F);
   static const warning = Color(0xFFFF9800);
 
   // --- Cores do tema ESCURO ---

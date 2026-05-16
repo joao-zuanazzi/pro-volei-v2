@@ -10,6 +10,13 @@ import 'match_screen.dart';
 import 'reports_screen.dart';
 import 'team_list_screen.dart';
 
+Route<void> _fadeRoute(Widget page) => PageRouteBuilder(
+  pageBuilder: (_, __, ___) => page,
+  transitionsBuilder: (_, anim, __, child) =>
+      FadeTransition(opacity: anim, child: child),
+  transitionDuration: const Duration(milliseconds: 300),
+);
+
 /// Tela inicial do aplicativo
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -268,10 +275,7 @@ class HomeScreen extends StatelessWidget {
       iconColor: AppTheme.team1Color,
       label: 'Gerenciar Equipes',
       description: 'Criar, editar e organizar equipes',
-      onTap: () => Navigator.push(
-        context,
-        MaterialPageRoute(builder: (_) => const TeamListScreen()),
-      ),
+      onTap: () => Navigator.push(context, _fadeRoute(const TeamListScreen())),
     );
   }
 
@@ -282,10 +286,7 @@ class HomeScreen extends StatelessWidget {
       iconColor: AppTheme.primaryGold,
       label: 'Relatórios',
       description: 'Histórico e PDF das partidas',
-      onTap: () => Navigator.push(
-        context,
-        MaterialPageRoute(builder: (_) => const ReportsScreen()),
-      ),
+      onTap: () => Navigator.push(context, _fadeRoute(const ReportsScreen())),
     );
   }
 
@@ -296,10 +297,7 @@ class HomeScreen extends StatelessWidget {
       iconColor: AppTheme.success,
       label: 'Dashboard',
       description: 'Estatísticas e evolução das equipes',
-      onTap: () => Navigator.push(
-        context,
-        MaterialPageRoute(builder: (_) => const DashboardScreen()),
-      ),
+      onTap: () => Navigator.push(context, _fadeRoute(const DashboardScreen())),
     );
   }
 
@@ -359,11 +357,7 @@ class HomeScreen extends StatelessWidget {
                 await game.loadMatchState();
                 if (context.mounted) {
                   Navigator.pop(dialogContext);
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) => const MatchScreen(),
-                    ),
-                  );
+                  Navigator.of(context).push(_fadeRoute(const MatchScreen()));
                 }
               },
               child: const Text('RETOMAR PARTIDA'),
@@ -455,9 +449,7 @@ class _MatchSetupDialogState extends State<MatchSetupDialog> {
             }
 
             Navigator.pop(context);
-            Navigator.of(context).push(
-              MaterialPageRoute(builder: (context) => const MatchScreen()),
-            );
+            Navigator.of(context).push(_fadeRoute(const MatchScreen()));
           },
         ),
       ],
