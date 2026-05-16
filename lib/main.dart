@@ -4,7 +4,7 @@ import 'services/game_service.dart';
 import 'services/storage_service.dart';
 import 'services/theme_provider.dart';
 import 'theme/app_theme.dart';
-import 'screens/home_screen.dart';
+import 'screens/startup_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -47,7 +47,7 @@ class ProVoleiApp extends StatelessWidget {
             theme: AppTheme.lightTheme,
             darkTheme: AppTheme.darkTheme,
             themeMode: theme.isDarkMode ? ThemeMode.dark : ThemeMode.light,
-            home: const HomeScreen(),
+            home: const StartupScreen(),
           );
         },
       ),
