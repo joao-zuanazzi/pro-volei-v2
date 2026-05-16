@@ -304,7 +304,7 @@ class HomeScreen extends StatelessWidget {
   Widget _buildVersion(BuildContext context) {
     final colors = AppTheme.of(context);
     return Text(
-      'Versão 2.3',
+      'Versão 3.0',
       style: TextStyle(
         fontSize: 12,
         color: colors.textHint,
