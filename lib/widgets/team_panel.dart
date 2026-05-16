@@ -121,7 +121,7 @@ class TeamPanel extends StatelessWidget {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(type.icon, style: const TextStyle(fontSize: 16)),
-                        const SizedBox(width: 6),
+                        const SizedBox(width: 8),
                         Text(
                           type.label,
                           style: TextStyle(
@@ -301,7 +301,7 @@ class TeamPanel extends StatelessWidget {
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppTheme.success,
                 foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: 14),
+                padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -318,7 +318,7 @@ class TeamPanel extends StatelessWidget {
             style: ElevatedButton.styleFrom(
               backgroundColor: AppTheme.error,
               foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(vertical: 14),
+              padding: const EdgeInsets.symmetric(vertical: 16),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),

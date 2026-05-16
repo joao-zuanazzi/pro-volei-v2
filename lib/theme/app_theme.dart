@@ -118,7 +118,7 @@ class AppTheme {
           backgroundColor: primaryBlue,
           foregroundColor: Colors.white,
           elevation: 2,
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),

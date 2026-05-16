@@ -244,7 +244,7 @@ class _MatchScreenState extends State<MatchScreen> {
                                 : AppTheme.warning,
                             size: 16,
                           ),
-                          const SizedBox(width: 6),
+                          const SizedBox(width: 8),
                           Text(
                             '$m:$s',
                             style: TextStyle(
@@ -466,7 +466,7 @@ class _MatchScreenState extends State<MatchScreen> {
               onPressed: () => _finishSet(context),
             ),
           ),
-          const SizedBox(width: 10),
+          const SizedBox(width: 8),
           Expanded(
             child: GradientButton(
               text: 'FINALIZAR JOGO',

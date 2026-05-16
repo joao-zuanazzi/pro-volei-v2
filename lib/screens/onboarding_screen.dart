@@ -207,7 +207,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                             ),
                           ),
                         ),
-                        const SizedBox(height: 10),
+                        const SizedBox(height: 8),
                         Text(
                           page.body,
                           style: TextStyle(
@@ -276,7 +276,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     final isLandscape =
         MediaQuery.of(context).orientation == Orientation.landscape;
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: isLandscape ? 6 : 16),
+      padding: EdgeInsets.symmetric(vertical: isLandscape ? 8 : 16),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: List.generate(_pages.length, (i) {

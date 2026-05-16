@@ -357,7 +357,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           cor: AppTheme.success,
           valores: saques,
         ),
-        const SizedBox(height: 10),
+        const SizedBox(height: 8),
         _Sparkline(
           titulo: 'Aproveitamento de ataque',
           subtitulo: '% dos pontos da equipe que vieram do ataque',
@@ -365,7 +365,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           cor: AppTheme.primaryGold,
           valores: ataques,
         ),
-        const SizedBox(height: 10),
+        const SizedBox(height: 8),
         _Sparkline(
           titulo: 'Erros cometidos',
           subtitulo: '% das jogadas em que a equipe errou',
@@ -381,8 +381,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget _buildAvisoAmostraPequena(int n) {
     final colors = AppTheme.of(context);
     return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
         color: AppTheme.warning.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(10),
@@ -496,7 +496,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     final i = val.toInt();
                     if (i < 0 || i >= barras.length) return const SizedBox();
                     return Padding(
-                      padding: const EdgeInsets.only(top: 6),
+                      padding: const EdgeInsets.only(top: 8),
                       child: Text(
                         barras[i].label,
                         style: TextStyle(
@@ -652,7 +652,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         ),
                       ),
                     ),
-                    const SizedBox(width: 10),
+                    const SizedBox(width: 8),
                     Expanded(
                       child: Text(
                         '#${j.numero} ${j.nome}',
@@ -672,7 +672,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     ),
                   ],
                 ),
-                const SizedBox(height: 6),
+                const SizedBox(height: 8),
                 ClipRRect(
                   borderRadius: BorderRadius.circular(4),
                   child: LinearProgressIndicator(
@@ -791,7 +791,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         ),
                       ),
                     ),
-                    const SizedBox(width: 10),
+                    const SizedBox(width: 8),
                     Expanded(
                       child: Text(
                         '#${j.numero} ${j.nome}',
@@ -811,7 +811,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     ),
                   ],
                 ),
-                const SizedBox(height: 6),
+                const SizedBox(height: 8),
                 ClipRRect(
                   borderRadius: BorderRadius.circular(4),
                   child: LinearProgressIndicator(
@@ -914,13 +914,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   valor: a.vitorias,
                   cor: AppTheme.success,
                 ),
-                const SizedBox(width: 6),
+                const SizedBox(width: 8),
                 _PillResultado(
                   letra: 'E',
                   valor: a.empates,
                   cor: AppTheme.warning,
                 ),
-                const SizedBox(width: 6),
+                const SizedBox(width: 8),
                 _PillResultado(
                   letra: 'D',
                   valor: a.derrotas,
@@ -1107,7 +1107,7 @@ class _PillResultado extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: 36,
-      padding: const EdgeInsets.symmetric(vertical: 6),
+      padding: const EdgeInsets.symmetric(vertical: 8),
       alignment: Alignment.center,
       decoration: BoxDecoration(
         color: cor.withValues(alpha: 0.15),
@@ -1176,7 +1176,7 @@ class _Sparkline extends StatelessWidget {
     final maxVal = valores.reduce((a, b) => a > b ? a : b);
 
     return Container(
-      padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
       decoration: BoxDecoration(
         color: colors.card,
         borderRadius: BorderRadius.circular(14),
@@ -1198,7 +1198,7 @@ class _Sparkline extends StatelessWidget {
                 ),
                 child: Icon(icone, color: cor, size: 18),
               ),
-              const SizedBox(width: 10),
+              const SizedBox(width: 8),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -1279,7 +1279,7 @@ class _Sparkline extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 8),
           // Footer: média / mín / máx / nº partidas
           _buildEstatisticas(media, minVal, maxVal, colors),
         ],
@@ -1313,7 +1313,7 @@ class _Sparkline extends StatelessWidget {
       ),
     );
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 6),
+      padding: const EdgeInsets.symmetric(vertical: 8),
       decoration: BoxDecoration(
         color: colors.surface.withValues(alpha: 0.5),
         borderRadius: BorderRadius.circular(8),
@@ -1482,7 +1482,7 @@ class _ResumoCard extends StatelessWidget {
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(6),
+                padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
                   color: cor.withValues(alpha: 0.18),
                   borderRadius: BorderRadius.circular(8),
@@ -1514,7 +1514,7 @@ class _ResumoCard extends StatelessWidget {
                 ),
               ),
               if (subtitulo != null) ...[
-                const SizedBox(width: 6),
+                const SizedBox(width: 8),
                 Padding(
                   padding: const EdgeInsets.only(bottom: 4),
                   child: Text(

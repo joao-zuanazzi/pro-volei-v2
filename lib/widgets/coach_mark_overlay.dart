@@ -147,7 +147,7 @@ class _CoachMarkOverlayState extends State<CoachMarkOverlay> {
         MediaQuery.of(context).orientation == Orientation.landscape;
 
     return Container(
-      padding: EdgeInsets.all(isLandscape ? 14 : 20),
+      padding: EdgeInsets.all(isLandscape ? 12 : 20),
       decoration: BoxDecoration(
         color: colors.card,
         borderRadius: BorderRadius.circular(20),

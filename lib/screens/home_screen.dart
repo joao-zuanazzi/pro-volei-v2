@@ -164,7 +164,7 @@ class HomeScreen extends StatelessWidget {
         onTap: () => _showMatchSetup(context),
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
-          padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 18),
+          padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 16),
           decoration: BoxDecoration(
             gradient: AppTheme.primaryGradient,
             borderRadius: BorderRadius.circular(30),
@@ -213,7 +213,7 @@ class HomeScreen extends StatelessWidget {
         onTap: onTap,
         borderRadius: BorderRadius.circular(16),
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16),
             border: Border.all(color: colors.border),
