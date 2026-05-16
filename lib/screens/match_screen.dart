@@ -4,17 +4,71 @@ import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 import '../models/match_stats_snapshot.dart';
 import '../services/game_service.dart';
+import '../services/onboarding_service.dart';
 import '../services/pdf_service.dart';
 import '../services/report_storage_service.dart';
 import '../theme/app_theme.dart';
 import '../widgets/action_button.dart';
+import '../widgets/coach_mark_overlay.dart';
 import '../widgets/score_bar.dart';
 import '../widgets/set_selector.dart';
 import '../widgets/team_panel.dart';
 
 /// Tela principal da partida
-class MatchScreen extends StatelessWidget {
+class MatchScreen extends StatefulWidget {
   const MatchScreen({super.key});
+
+  @override
+  State<MatchScreen> createState() => _MatchScreenState();
+}
+
+class _MatchScreenState extends State<MatchScreen> {
+  final _scoreKey = GlobalKey();
+  final _teamPanelsKey = GlobalKey();
+  final _setSelectorKey = GlobalKey();
+  final _footerKey = GlobalKey();
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _maybeShowTutorial());
+  }
+
+  Future<void> _maybeShowTutorial() async {
+    final done = await OnboardingService.isMatchTutorialDone();
+    if (done || !mounted) return;
+
+    CoachMarkOverlay.show(
+      context: context,
+      steps: [
+        CoachMarkStep(
+          targetKey: _scoreKey,
+          title: 'Placar ao vivo',
+          body:
+              'Acompanhe o placar em tempo real. Toque em "Trocar" para inverter os lados das equipes na tela.',
+        ),
+        CoachMarkStep(
+          targetKey: _teamPanelsKey,
+          title: 'Registro de Pontos',
+          body:
+              'Aqui você registra os pontos de cada equipe. Selecione o Tipo, preencha o Detalhe, escolha o Jogador e toque em Salvar.',
+        ),
+        CoachMarkStep(
+          targetKey: _setSelectorKey,
+          title: 'Seletor de Set',
+          body:
+              'Acompanhe o progresso dos sets. O set atual fica destacado em dourado. Novos sets aparecem conforme a partida avança.',
+        ),
+        CoachMarkStep(
+          targetKey: _footerKey,
+          title: 'Finalizar Set e Jogo',
+          body:
+              'Ao terminar um set, toque em FINALIZAR SET. Para encerrar a partida, toque em FINALIZAR JOGO — os PDFs são gerados automaticamente.',
+        ),
+      ],
+      onComplete: () => OnboardingService.markMatchTutorialDone(),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -36,10 +90,15 @@ class MatchScreen extends StatelessWidget {
                   return Column(
                     children: [
                       _buildHeader(context),
-                      _buildScoreDisplay(context),
-                      Expanded(child: _buildTeamPanels(context)),
-                      _buildSetSelector(context),
-                      _buildActionButtons(context),
+                      Container(key: _scoreKey, child: _buildScoreDisplay(context)),
+                      Expanded(
+                        child: Container(
+                          key: _teamPanelsKey,
+                          child: _buildTeamPanels(context),
+                        ),
+                      ),
+                      Container(key: _setSelectorKey, child: _buildSetSelector(context)),
+                      Container(key: _footerKey, child: _buildActionButtons(context)),
                     ],
                   );
                 }
@@ -48,13 +107,16 @@ class MatchScreen extends StatelessWidget {
                   child: Column(
                     children: [
                       _buildHeader(context),
-                      _buildScoreDisplay(context, compact: true),
+                      Container(key: _scoreKey, child: _buildScoreDisplay(context, compact: true)),
                       SizedBox(
                         height: constraints.maxHeight * 0.55,
-                        child: _buildTeamPanels(context),
+                        child: Container(
+                          key: _teamPanelsKey,
+                          child: _buildTeamPanels(context),
+                        ),
                       ),
-                      _buildSetSelector(context),
-                      _buildActionButtons(context),
+                      Container(key: _setSelectorKey, child: _buildSetSelector(context)),
+                      Container(key: _footerKey, child: _buildActionButtons(context)),
                     ],
                   ),
                 );
