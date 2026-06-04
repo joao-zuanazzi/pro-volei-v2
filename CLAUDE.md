@@ -39,34 +39,40 @@ O app permite:
 ### Estrutura de arquivos
 ```
 lib/
-├── main.dart                    # Entry point, MultiProvider, MaterialApp
+├── main.dart                       # Entry point: MultiProvider + Consumer<ThemeProvider> + MaterialApp
 ├── models/
-│   ├── match_report.dart        # Modelo de relatório salvo
-│   ├── player.dart              # Modelo de jogador
-│   ├── point.dart               # Modelo de ponto registrado
-│   ├── point_type.dart          # Enum PointType + PointDetail
-│   ├── set_data.dart            # Dados de um set
-│   ├── team.dart                # Modelo de equipe
-│   └── team_stats.dart          # Estatísticas acumuladas
+│   ├── match_report.dart           # Metadados de uma partida salva (PDFs + snapshot)
+│   ├── match_stats_snapshot.dart   # "Foto" estatística da partida (base do Dashboard)
+│   ├── player.dart                 # Modelo de jogador (+ PlayerAdapter Hive)
+│   ├── point.dart                  # Modelo de ponto registrado
+│   ├── point_type.dart             # Enums PointType + PointDetail (labels PT-BR)
+│   ├── set_data.dart               # Dados de um set (pontos, vencedor, duração)
+│   ├── team.dart                   # Modelo de equipe (+ TeamAdapter Hive)
+│   └── team_stats.dart             # Estatísticas acumuladas de uma equipe
 ├── screens/
-│   ├── home_screen.dart         # Tela inicial + MatchSetupDialog
-│   ├── match_screen.dart        # Tela principal da partida
-│   ├── reports_screen.dart      # Listagem de relatórios
-│   ├── team_editor_screen.dart  # Editor de equipe + _PlayerDialog
-│   └── team_list_screen.dart    # Lista de equipes
+│   ├── startup_screen.dart         # Splash/roteamento: decide onboarding vs home
+│   ├── onboarding_screen.dart      # Tela de boas-vindas (6 slides), 1º uso
+│   ├── home_screen.dart            # Tela inicial + MatchSetupDialog
+│   ├── match_screen.dart           # Tela principal da partida
+│   ├── dashboard_screen.dart       # Dashboard de estatísticas históricas (fl_chart)
+│   ├── reports_screen.dart         # Listagem de relatórios
+│   ├── team_editor_screen.dart     # Editor de equipe + _PlayerDialog
+│   └── team_list_screen.dart       # Lista de equipes
 ├── services/
-│   ├── game_service.dart        # Lógica do jogo (ChangeNotifier)
-│   ├── pdf_service.dart         # Geração de PDFs
-│   ├── report_storage_service.dart  # Persistência de relatórios
-│   ├── storage_service.dart     # Persistência de equipes (Hive)
-│   └── theme_provider.dart      # Gerenciador de tema (ChangeNotifier)
+│   ├── game_service.dart           # Lógica do jogo (ChangeNotifier)
+│   ├── onboarding_service.dart     # Flags de tutorial (SharedPreferences)
+│   ├── pdf_service.dart            # Geração de PDFs
+│   ├── report_storage_service.dart # Persistência de relatórios (JSON em arquivo)
+│   ├── storage_service.dart        # Persistência de equipes (Hive)
+│   └── theme_provider.dart         # Gerenciador de tema (ChangeNotifier)
 ├── theme/
-│   └── app_theme.dart           # ThemeData + AppThemeColors
+│   └── app_theme.dart              # ThemeData + AppThemeColors
 └── widgets/
-    ├── action_button.dart       # GradientButton + CircleActionButton
-    ├── score_bar.dart           # ScoreDisplay (placar grande animado)
-    ├── set_selector.dart        # Seletor visual de sets
-    └── team_panel.dart          # Painel de registro de pontos
+    ├── action_button.dart          # GradientButton + CircleActionButton
+    ├── coach_mark_overlay.dart     # Tutorial contextual (coach mark) na partida
+    ├── score_bar.dart              # ScoreDisplay (placar grande animado)
+    ├── set_selector.dart           # Seletor visual de sets (progressivo)
+    └── team_panel.dart             # Painel de registro de pontos
 ```
 
 ### Ambiente de desenvolvimento
@@ -88,26 +94,21 @@ lib/
 
 ## Estado atual do código
 
-### ⚠️ MUDANÇAS NÃO COMMITADAS
-O branch `main` tem a feature **Tema Claro/Escuro** implementada mas NÃO commitada.
-Arquivos modificados: `main.dart`, todas as screens, `app_theme.dart`, widgets, + novos: `theme_provider.dart`, `assets/logo_dark.png`.
-
-**Antes de trabalhar, faça commit dessas mudanças:**
-```bash
-git add .
-git commit -m "feat: tema claro/escuro com toggle na home screen"
-git push origin main
-```
+Versão exibida no app: **3.0**. Fases 3, 4 e 5 concluídas e commitadas na `main`
+(branch de trabalho). Build Android (APK) e Windows (desktop) funcionando.
 
 ### Features implementadas ✅
-1. Sistema completo de registro de partida (pontos, sets, times)
-2. Gerenciamento de equipes e atletas (CRUD)
-3. Geração de PDFs (por set e partida completa)
-4. Compartilhar PDFs via WhatsApp/Email
-5. Salvar/retomar partidas interrompidas
-6. Tema claro/escuro com toggle (☀️/🌙 na home screen)
-7. Timer de partida
-8. Swap de equipes (VS clicável)
+1. Registro completo de partida (pontos por tipo/detalhe/jogador, sets, times)
+2. Gerenciamento de equipes e atletas (CRUD via Hive)
+3. Geração de PDFs (por set e partida completa) + compartilhamento (WhatsApp/Email)
+4. Salvar/retomar partidas interrompidas
+5. Tema claro/escuro com toggle (☀️/🌙 na home screen), persistido
+6. Cronômetro iniciar/pausar; swap de lados ("Trocar"); desfazer último ponto
+7. Dashboard de estatísticas históricas com gráficos (fl_chart)
+8. Onboarding de primeiro uso: tela de boas-vindas (6 slides) + coach mark na partida
+9. Rodada extensa de melhorias de UX (Fase 5, heurísticas de Nielsen): fade entre
+   telas, haptic feedback, tooltips, set selector progressivo, contraste WCAG AA,
+   cards de navegação clicáveis, diálogos revisados, escala de espaçamento de 4px
 
-### Leia: docs/ROADMAP.md para o que falta fazer.
+### Leia: docs/ROADMAP.md para o que ainda falta fazer.
 ### Leia: docs/HISTORICO.md para decisões passadas e gotchas.

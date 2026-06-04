@@ -57,6 +57,30 @@ Este documento registra decisões de design, bugs corrigidos e armadilhas para q
 - Reinstalou, mas o JAVA_HOME pode ainda apontar para JDK antigo (`C:\Program Files\Microsoft\jdk-17.0.18.8-hotspot`).
 - **Fix**: Verificar `flutter doctor` e apontar JAVA_HOME para o JDK bundled do Android Studio (normalmente `C:\Program Files\Android\Android Studio\jbr`).
 
+### Diálogo de saída após partida finalizada
+- A `MatchScreen` tem um flag `_matchFinished` que vira `true` ao FINALIZAR JOGO (após o
+  PDF final ser gerado e `GameService.clearSavedMatch()` rodar).
+- Quando `_matchFinished == true`, sair da tela mostra um **diálogo simples SIM/NÃO**
+  ("a partida foi finalizada, deseja voltar à tela inicial?") — e **não** o diálogo de
+  salvar/perda de dados (CANCELAR / SAIR SEM SALVAR / VOLTAR DEPOIS). Vale tanto para o
+  botão X do header quanto para o gesto de voltar (`PopScope`).
+- Motivo: depois de finalizada, não há progresso a salvar; o diálogo só existe para
+  evitar saída acidental.
+
+### Flash no placar (tentado e revertido)
+- Tentou-se substituir o snackbar "Ponto registrado" por um flash animado no número do
+  placar. **Não agradou e foi revertido.** Decisão: manter o snackbar curto (~1s).
+- `score_bar.dart` voltou ao `_AnimatedScore` original (`TweenAnimationBuilder` animando
+  o delta). Não reintroduza o flash sem nova validação.
+
+### Desktop (Windows) — compartilhamento e abrir PDF
+- O app compila e roda no Windows (`flutter build windows --release`); todos os plugins
+  têm implementação Windows.
+- **`Share.shareXFiles` no Windows** abre a barra de compartilhamento do Windows, que é
+  diferente da do Android e costuma listar poucos apps. Não é bug do app — é limitação
+  do SO. O caminho confiável no desktop é "ABRIR PDF" (`OpenFile.open`), que abre no
+  leitor padrão.
+
 ---
 
 ## 📐 Arquitetura
@@ -83,6 +107,23 @@ Este documento registra decisões de design, bugs corrigidos e armadilhas para q
 - Gerencia `isDarkMode` com persistência via SharedPreferences.
 - `toggleTheme()` — alterna e salva.
 - Inicializado no `main()` antes do `runApp()`.
+
+### Onboarding (primeiro uso)
+- A `home:` real do `MaterialApp` é a `StartupScreen`, que decide via
+  `OnboardingService.isWelcomeDone()` se navega para `OnboardingScreen` (6 slides) ou
+  direto para `HomeScreen`.
+- `OnboardingService` guarda 2 flags em SharedPreferences:
+  `provolei_onboarding_done` (welcome flow) e `provolei_match_tutorial_done`
+  (coach mark da partida). `resetAll()` existe só para teste/debug.
+- `CoachMarkOverlay` (widget) escurece a tela e destaca elementos da `MatchScreen` no 1º
+  uso, com cartão de explicação. Suporta portrait e landscape.
+
+### Dashboard
+- `DashboardScreen` agrega todos os `MatchReport` que possuem `stats`
+  (`MatchStatsSnapshot`). Partidas finalizadas **antes da Fase 4** não têm snapshot e
+  por isso não aparecem no dashboard.
+- O snapshot é construído por `MatchStatsSnapshot.fromMatch(...)` no momento de finalizar
+  o jogo e salvo junto do relatório (`ReportStorageService.addFinalReport`).
 
 ---
 
