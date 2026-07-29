@@ -16,7 +16,9 @@ import '../widgets/team_panel.dart';
 
 /// Tela principal da partida
 class MatchScreen extends StatefulWidget {
-  const MatchScreen({super.key});
+  final bool forceTutorial;
+
+  const MatchScreen({super.key, this.forceTutorial = false});
 
   @override
   State<MatchScreen> createState() => _MatchScreenState();
@@ -37,8 +39,13 @@ class _MatchScreenState extends State<MatchScreen> {
 
   Future<void> _maybeShowTutorial() async {
     final done = await OnboardingService.isMatchTutorialDone();
-    if (done || !mounted) return;
+    if (!widget.forceTutorial && done) return;
+    if (!mounted) return;
 
+    _showMatchCoachMarks();
+  }
+
+  void _showMatchCoachMarks() {
     CoachMarkOverlay.show(
       context: context,
       steps: [
@@ -67,7 +74,18 @@ class _MatchScreenState extends State<MatchScreen> {
               'Ao terminar um set, toque em FINALIZAR SET. Para encerrar a partida, toque em FINALIZAR JOGO — os PDFs são gerados automaticamente.',
         ),
       ],
-      onComplete: () => OnboardingService.markMatchTutorialDone(),
+      onComplete: () async {
+        await OnboardingService.markMatchTutorialDone();
+        if (widget.forceTutorial && mounted) {
+          final hasSaved = await GameService.hasSavedMatch();
+          if (!hasSaved && mounted) {
+            context.read<GameService>().resetGame();
+          }
+          if (mounted && Navigator.canPop(context)) {
+            Navigator.pop(context);
+          }
+        }
+      },
     );
   }
 
@@ -143,16 +161,23 @@ class _MatchScreenState extends State<MatchScreen> {
           // Botão de sair (fecha a partida) — usa ícone de fechar (X) em vez
           // de seta de voltar porque o tap abre um diálogo modal, não navega.
           SizedBox(
-            width: 80,
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: IconButton(
-                icon: Icon(Icons.close, color: colors.textSecondary),
-                tooltip: 'Sair da partida',
-                onPressed: () => _matchFinished
-                    ? _showFinishedExitDialog(context)
-                    : _showExitDialog(context),
-              ),
+            width: 96,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                IconButton(
+                  icon: Icon(Icons.close, color: colors.textSecondary),
+                  tooltip: 'Sair da partida',
+                  onPressed: () => _matchFinished
+                      ? _showFinishedExitDialog(context)
+                      : _showExitDialog(context),
+                ),
+                IconButton(
+                  icon: Icon(Icons.help_outline, color: colors.textSecondary, size: 20),
+                  tooltip: 'Rever tutorial da partida',
+                  onPressed: _showMatchCoachMarks,
+                ),
+              ],
             ),
           ),
           // Centro: Título + nome da partida (expansível)

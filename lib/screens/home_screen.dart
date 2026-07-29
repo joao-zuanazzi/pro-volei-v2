@@ -7,6 +7,7 @@ import '../services/theme_provider.dart';
 import '../theme/app_theme.dart';
 import 'dashboard_screen.dart';
 import 'match_screen.dart';
+import 'onboarding_screen.dart';
 import 'reports_screen.dart';
 import 'team_list_screen.dart';
 
@@ -99,11 +100,18 @@ class HomeScreen extends StatelessWidget {
                   );
                 },
               ),
-              // Botão de toggle de tema
+              // Botões de topo (Tutorial e Tema)
               Positioned(
                 top: 8,
                 right: 8,
-                child: _buildThemeToggle(context),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _buildTutorialIconButton(context),
+                    const SizedBox(width: 8),
+                    _buildThemeToggle(context),
+                  ],
+                ),
               ),
             ],
           ),
@@ -299,6 +307,208 @@ class HomeScreen extends StatelessWidget {
       description: 'Estatísticas e evolução das equipes',
       onTap: () => Navigator.push(context, _fadeRoute(const DashboardScreen())),
     );
+  }
+
+  Widget _buildTutorialIconButton(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () => _showTutorialChoiceDialog(context),
+        borderRadius: BorderRadius.circular(20),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+          decoration: BoxDecoration(
+            color: AppTheme.primaryGold.withValues(alpha: 0.16),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: AppTheme.primaryGold.withValues(alpha: 0.7),
+              width: 1.5,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: AppTheme.primaryGold.withValues(alpha: 0.2),
+                blurRadius: 10,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ShaderMask(
+                shaderCallback: (bounds) =>
+                    AppTheme.goldGradient.createShader(bounds),
+                child: const Icon(
+                  Icons.school_rounded,
+                  color: Colors.white,
+                  size: 18,
+                ),
+              ),
+              const SizedBox(width: 6),
+              const Text(
+                'TUTORIAL',
+                style: TextStyle(
+                  color: AppTheme.primaryGold,
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 1.1,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showTutorialChoiceDialog(BuildContext context) {
+    final colors = AppTheme.of(context);
+
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        backgroundColor: colors.dialogBackground,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Row(
+          children: [
+            const Icon(Icons.school_rounded, color: AppTheme.primaryGold, size: 28),
+            const SizedBox(width: 10),
+            Text(
+              'Tutoriais',
+              style: TextStyle(
+                color: colors.text,
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'Escolha qual tutorial deseja visualizar:',
+              style: TextStyle(color: colors.textSecondary, fontSize: 14),
+            ),
+            const SizedBox(height: 16),
+            _buildDialogOption(
+              context: dialogContext,
+              icon: Icons.auto_stories_rounded,
+              color: const Color(0xFF4FC3F7),
+              title: 'Guia de Boas-Vindas',
+              subtitle: 'Visão geral de todas as telas e recursos do aplicativo',
+              onTap: () {
+                Navigator.pop(dialogContext);
+                Navigator.push(context, _fadeRoute(const OnboardingScreen()));
+              },
+            ),
+            const SizedBox(height: 12),
+            _buildDialogOption(
+              context: dialogContext,
+              icon: Icons.sports_volleyball_rounded,
+              color: AppTheme.primaryGold,
+              title: 'Tutorial da Partida',
+              subtitle: 'Interaja com a tela de jogo real e veja as dicas destacadas',
+              onTap: () {
+                Navigator.pop(dialogContext);
+                _openMatchTutorial(context);
+              },
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: Text(
+              'FECHAR',
+              style: TextStyle(
+                color: colors.cancelButton,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDialogOption({
+    required BuildContext context,
+    required IconData icon,
+    required Color color,
+    required String title,
+    required String subtitle,
+    required VoidCallback onTap,
+  }) {
+    final colors = AppTheme.of(context);
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(14),
+        child: Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: color.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: color.withValues(alpha: 0.3)),
+          ),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.2),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(icon, color: color, size: 24),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: TextStyle(
+                        color: colors.text,
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      subtitle,
+                      style: TextStyle(
+                        color: colors.textSecondary,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(Icons.chevron_right, color: colors.textHint, size: 20),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _openMatchTutorial(BuildContext context) async {
+    final game = context.read<GameService>();
+    final hasSaved = await GameService.hasSavedMatch();
+    if (!hasSaved) {
+      game.resetGame();
+    } else {
+      await game.loadMatchState();
+    }
+    if (context.mounted) {
+      Navigator.push(
+        context,
+        _fadeRoute(const MatchScreen(forceTutorial: true)),
+      );
+    }
   }
 
   Widget _buildVersion(BuildContext context) {

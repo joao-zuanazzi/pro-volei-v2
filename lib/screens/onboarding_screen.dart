@@ -91,10 +91,14 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   Future<void> _complete() async {
     await OnboardingService.markWelcomeDone();
     if (!mounted) return;
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (_) => const HomeScreen()),
-    );
+    if (Navigator.canPop(context)) {
+      Navigator.pop(context);
+    } else {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const HomeScreen()),
+      );
+    }
   }
 
   void _next() {
@@ -112,8 +116,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   Widget build(BuildContext context) {
     final isLandscape =
         MediaQuery.of(context).orientation == Orientation.landscape;
+    final canPop = Navigator.canPop(context);
     return PopScope(
-      canPop: false,
+      canPop: canPop,
       child: Scaffold(
         body: Container(
           decoration:
@@ -144,13 +149,21 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   Widget _buildTopBar() {
     final colors = AppTheme.of(context);
+    final canPop = Navigator.canPop(context);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          const SizedBox(width: 64),
-          if (_currentPage > 0)
+          if (canPop)
+            IconButton(
+              icon: Icon(Icons.arrow_back, color: colors.textSecondary),
+              tooltip: 'Voltar',
+              onPressed: () => Navigator.pop(context),
+            )
+          else
+            const SizedBox(width: 48),
+          if (_currentPage > 0 || canPop)
             TextButton(
               onPressed: _complete,
               child: Text(
@@ -159,7 +172,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               ),
             )
           else
-            const SizedBox(width: 64),
+            const SizedBox(width: 48),
         ],
       ),
     );
